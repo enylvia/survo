@@ -1,7 +1,6 @@
 package test
 
 import (
-	"fmt"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -27,22 +26,49 @@ func MigrateTable(db *gorm.DB) {
 		return
 	}
 	db.Migrator().CreateTable(&user.User{})
-
-	fmt.Println("Migrate Success")
 }
+
 func TruncateTable(db *gorm.DB) {
-	db.Exec("TRUNCATE users")
+	db.Migrator().DropTable("users")
 }
 
 func TestMigrateTableUser(t *testing.T) {
 	db, err := GetConnection()
 	helper.ErrorNotNil(err)
 
+
 	MigrateTable(db)
+
+	defer TruncateTable(db)
 	assert.Equal(t, true, db.Migrator().HasTable("users"))
 	assert.NoError(t, err)
 }
 
-func TestCreate(t *testing.T) {
+func TestCreateRepository_withDummyData(t *testing.T) {
+	db, err := GetConnection()
+	helper.ErrorNotNil(err)
+
+	MigrateTable(db)
+	defer TruncateTable(db)
+
+	createData := user.NewRepository(db)
+	input := user.User{
+		Id:         1,
+		FullName:   "Adit",
+		Email:      "adit@mail.com",
+		Username:   "addityap",
+		Occupation: "Mahasiswa",
+		Role:       "Surveyor",
+		Password:   "12345678",
+		Image:      "image.jpg",
+		Phone:      "0820222",
+		Birthday:   "06-01-2001",
+	}
+
+	result , err := createData.Create(input)
+
+	assert.Equal(t, true, result.Id>0)
+	assert.NoError(t, err)
+
 
 }

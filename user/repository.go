@@ -20,8 +20,11 @@ func NewRepository(db *gorm.DB) *repository {
 }
 
 func (r *repository) Create(user User) (User, error) {
-	//TODO implement me
-	panic("implement me")
+	err := r.db.Create(&user).Error
+	if err != nil {
+		return user, err
+	}
+	return user,nil
 }
 
 func (r *repository) FindByEmail(email string) (User, error) {
