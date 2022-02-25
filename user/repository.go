@@ -1,6 +1,8 @@
 package user
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 type Repository interface {
 	Create(user User) (User, error)
@@ -28,16 +30,27 @@ func (r *repository) Create(user User) (User, error) {
 }
 
 func (r *repository) FindByEmail(email string) (User, error) {
-	//TODO implement me
-	panic("implement me")
+	var user User
+	err := r.db.Where("email = ?", email).First(&user).Error
+	if err != nil {
+		return user, err
+	}
+	return user, nil
 }
 
 func (r *repository) FindByID(id int) (User, error) {
-	//TODO implement me
-	panic("implement me")
+	var user User
+	err := r.db.Where("id = ?", id).First(&user).Error
+	if err != nil {
+		return user,err
+	}
+	return user , nil
 }
 
 func (r *repository) Update(user User) (User, error) {
-	//TODO implement me
-	panic("implement me")
+	err := r.db.Save(&user).Error
+	if err != nil {
+		return user, err
+	}
+	return user,nil
 }
