@@ -136,7 +136,7 @@ func TestUpdateData_withDummyData(t *testing.T) {
 	helper.ErrorNotNil(err)
 
 	MigrateTable(db)
-	//defer TruncateTable(db)
+	defer TruncateTable(db)
 
 	updateData := user.NewRepository(db)
 	input := user.User{
