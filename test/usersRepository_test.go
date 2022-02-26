@@ -58,7 +58,6 @@ func TestCreateRepository_withDummyData(t *testing.T) {
 		Email:      "adit@mail.com",
 		Username:   "addityap",
 		Occupation: "Mahasiswa",
-		Role:       "Surveyor",
 		Password:   "12345678",
 		Image:      "image.jpg",
 		Phone:      "0820222",
@@ -86,7 +85,6 @@ func TestFindByEmail_withDummyEmail(t *testing.T) {
 		Email:      "adit@mail.com",
 		Username:   "addityap",
 		Occupation: "Mahasiswa",
-		Role:       "Surveyor",
 		Password:   "12345678",
 		Image:      "image.jpg",
 		Phone:      "0820222",
@@ -115,7 +113,6 @@ func TestFindByID_withDummyIdUser(t *testing.T) {
 		Email:      "adit@mail.com",
 		Username:   "addityap",
 		Occupation: "Mahasiswa",
-		Role:       "Surveyor",
 		Password:   "12345678",
 		Image:      "image.jpg",
 		Phone:      "0820222",
@@ -145,7 +142,6 @@ func TestUpdateData_withDummyData(t *testing.T) {
 		Email:      "adit@mail.com",
 		Username:   "addityap",
 		Occupation: "Mahasiswa",
-		Role:       "Surveyor",
 		Password:   "12345678",
 		Image:      "image.jpg",
 		Phone:      "0820222",
@@ -159,7 +155,6 @@ func TestUpdateData_withDummyData(t *testing.T) {
 		data.Email=      "adist@mail.com"
 		data.Username=   "addistyap"
 		data.Occupation= "Mahasiswas"
-		data.Role=       "Surveyors"
 		data.Password=   "12345678s"
 		data.Image=      "image.jpg"
 		data.Phone=      "0820222"
