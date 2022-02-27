@@ -26,7 +26,7 @@ func main(){
 
 	api.POST("/register", userHandler.RegisterUser)
 	api.POST("/login", userHandler.LoginUser)
-	api.PUT("/update", userHandler.UpdateProfile)
+	api.PUT("/update/:id", userHandler.UpdateProfile)
 
 	router.Run(":8080")
 }
