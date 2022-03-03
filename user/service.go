@@ -9,6 +9,7 @@ type Service interface {
 	RegisterUserForm(input RegisterInput) (User, error)
 	LoginUserForm(input LoginInput) (User, error)
 	UpdateUserForm(inputID DetailUserInput, input UpdateInput) (User, error)
+	GetUserByEmail(email string) (User, error)
 }
 
 type service struct {
@@ -81,4 +82,15 @@ func (s *service) UpdateUserForm(inputID DetailUserInput, input UpdateInput) (Us
 	}
 	return newData, nil
 
+}
+
+func (s *service)GetUserByEmail(email string) (User, error){
+	user, err := s.repository.FindByEmail(email)
+	if err != nil {
+		return user, err
+	}
+	if user.Email == "" {
+		return user, errors.New("user with that email not found")
+	}
+	return user, nil
 }

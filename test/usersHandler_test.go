@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"survorest/auth"
 	"survorest/helper"
 	"survorest/user"
 	"testing"
@@ -194,7 +195,7 @@ func TestUpdateUser_FormValidation(t *testing.T) {
 		Username:             "example",
 		Password:             "12345678",
 		PasswordConfirmation: "12345678",
-		Image: 				  "image.jpg",
+		Image:                "image.jpg",
 		Phone:                "081234567882",
 		Birthday:             "06-01-2001",
 	}
@@ -207,7 +208,7 @@ func TestUpdateUser_FormValidation(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	req,_ := http.NewRequest("PUT","http://localhost:8080/api/v1/update/"+inputIDs,&buf)
+	req, _ := http.NewRequest("PUT", "http://localhost:8080/api/v1/update/"+inputIDs, &buf)
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := client.Do(req)
@@ -221,10 +222,10 @@ func TestUpdateUser_FormValidation(t *testing.T) {
 
 func TestUpdateUser_Success(t *testing.T) {
 	log.Print("TestUpdateUser_Success")
-	//db, err := GetConnection()
-	//helper.ErrorNotNil(err)
-	//
-	//defer TruncateTable(db)
+	db, err := GetConnection()
+	helper.ErrorNotNil(err)
+
+	defer TruncateTable(db)
 
 	client := &http.Client{}
 
@@ -237,20 +238,20 @@ func TestUpdateUser_Success(t *testing.T) {
 		Username:             "example",
 		Password:             "12345678",
 		PasswordConfirmation: "12345678",
-		Image: 				  "image.jpg",
+		Image:                "image.jpg",
 		Phone:                "081234567882",
 		Birthday:             "06-01-2001",
 	}
 
 	var buf bytes.Buffer
 
-	err := json.NewEncoder(&buf).Encode(inputData)
+	err = json.NewEncoder(&buf).Encode(inputData)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	req,_ := http.NewRequest("PUT","http://localhost:8080/api/v1/update/"+inputIDs,&buf)
+	req, _ := http.NewRequest("PUT", "http://localhost:8080/api/v1/update/"+inputIDs, &buf)
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := client.Do(req)
@@ -260,4 +261,31 @@ func TestUpdateUser_Success(t *testing.T) {
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 	assert.Equal(t, "application/json", req.Header.Get("Content-Type"))
 
+}
+
+func TestGenerateToken(t *testing.T) {
+
+	jwtWrapper := auth.JwtWrapper{
+		SecretKey:       "survosecret",
+		Issuer:          "AuthService",
+		ExpirationHours: 2,
+	}
+
+	generatedToken, err := jwtWrapper.GenerateToken(1)
+	assert.NoError(t, err)
+
+	log.Printf("Generated Token: %s", generatedToken)
+}
+
+func TestValidateJwtToken(t *testing.T) {
+	signedToken := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJleHAiOjE2NDYzMDE4NDAsImlzcyI6IkF1dGhTZXJ2aWNlIn0.a6VTW15SWhWgNEGfSB8W1onxMqDuQncinHHq4mbRy00"
+	jwtWrapper := auth.JwtWrapper{
+		SecretKey: "survosecret",
+		Issuer:    "AuthService",
+	}
+
+	claims, err := jwtWrapper.ValidateToken(signedToken)
+	assert.NoError(t, err)
+	assert.Equal(t, 1, claims.UserID)
+	assert.Equal(t, "AuthService", claims.Issuer)
 }
