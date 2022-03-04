@@ -36,8 +36,8 @@ func (h *userHandler) RegisterUser(c *gin.Context) {
 		c.JSON(http.StatusUnprocessableEntity, response)
 		return
 	}
-
-	formatter := user.FormatUser(newData)
+token := "token"
+	formatter := user.FormatUser(newData,token)
 	response := helper.ApiResponse("Successfully created account", http.StatusCreated, "success", formatter)
 	c.JSON(http.StatusCreated, response)
 	return
@@ -62,8 +62,8 @@ func (h *userHandler) LoginUser(c *gin.Context) {
 		c.JSON(http.StatusUnprocessableEntity, response)
 		return
 	}
-
-	formatter := user.FormatUser(newData)
+	token := "token"
+	formatter := user.FormatUser(newData,token)
 	response := helper.ApiResponse("Login Successfully", http.StatusOK, "success", formatter)
 	c.JSON(http.StatusOK, response)
 	return
@@ -99,9 +99,33 @@ func (h *userHandler) UpdateProfile(c *gin.Context) {
 		c.JSON(http.StatusUnprocessableEntity, response)
 		return
 	}
-
-	formatter := user.FormatUser(newData)
+	token := "token"
+	formatter := user.FormatUser(newData,token)
 	response := helper.ApiResponse("Update Profile Successfully", http.StatusOK, "success", formatter)
+	c.JSON(http.StatusOK, response)
+	return
+}
+func (h *userHandler) GetProfile(c *gin.Context) {
+	var inputID user.DetailUserInput
+
+	err := c.ShouldBindUri(&inputID)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+
+		response := helper.ApiResponse("ID Invalid", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+	getData, err := h.userService.GetUserByID(inputID.ID)
+	if err != nil {
+		errorMessage := gin.H{"error": err.Error()}
+		response := helper.ApiResponse("User with that ID not found", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+	formatter := user.FormatDetailUser(getData)
+	response := helper.ApiResponse("Successfully get data", http.StatusOK, "success", formatter)
 	c.JSON(http.StatusOK, response)
 	return
 }

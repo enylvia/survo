@@ -7,7 +7,6 @@ type User struct {
 	Username   string `json:"username"  gorm:"type:varchar(100); not null"`
 	Occupation string `json:"occupation" gorm:"type:varchar(100); not null"`
 	Password   string `json:"password" gorm:"type:varchar(100); not null"`
-	Token      string `json:"token" gorm:"type:varchar(244); nullable"`
 	Image      string `json:"image" gorm:"type:varchar(100); nullable"`
 	Phone      string `json:"phone" gorm:"type:varchar(100); nullable"`
 	Birthday   string `json:"birthday" gorm:"type:varchar(100); nullable"`

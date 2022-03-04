@@ -10,6 +10,7 @@ type Service interface {
 	LoginUserForm(input LoginInput) (User, error)
 	UpdateUserForm(inputID DetailUserInput, input UpdateInput) (User, error)
 	GetUserByEmail(email string) (User, error)
+	GetUserByID(userID int) (User, error)
 }
 
 type service struct {
@@ -91,6 +92,16 @@ func (s *service)GetUserByEmail(email string) (User, error){
 	}
 	if user.Email == "" {
 		return user, errors.New("user with that email not found")
+	}
+	return user, nil
+}
+func (s *service)GetUserByID(userID int) (User, error){
+	user, err := s.repository.FindByID(userID)
+	if err != nil {
+		return user, err
+	}
+	if user.Id == 0 {
+		return user, errors.New("user not found")
 	}
 	return user, nil
 }
