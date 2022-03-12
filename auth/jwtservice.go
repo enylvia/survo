@@ -7,7 +7,7 @@ import (
 )
 
 type Service interface {
-	GenerateToken(userID int) (signedToken string, err error)
+	GenerateToken(userID int,email string) (signedToken string, err error)
 	ValidateToken(signedToken string) (claims *JwtClaim, err error)
 }
 type JwtWrapper struct {

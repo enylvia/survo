@@ -27,6 +27,16 @@ func FormatUser(user User, token string) UserFormatter {
 	}
 	return formatter
 }
+func FormatUserRegister(user User) UserFormatter {
+	formatter := UserFormatter{
+		ID:         int(user.Id),
+		FullName:   user.FullName,
+		Occupation: user.Occupation,
+		Email:      user.Email,
+	}
+	return formatter
+}
+
 
 func FormatDetailUser(user User) UserDetail {
 	formatter := UserDetail{

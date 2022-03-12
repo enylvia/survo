@@ -3,17 +3,20 @@ package handler
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"survorest/auth"
 	"survorest/helper"
 	"survorest/user"
 )
 
 type userHandler struct {
 	userService user.Service
+	jwtService auth.Service
 }
 
-func NewUserHandler(userService user.Service) *userHandler {
+func NewUserHandler(userService user.Service, jwtService auth.Service) *userHandler {
 	return &userHandler{
 		userService: userService,
+		jwtService: jwtService,
 	}
 }
 
@@ -36,8 +39,7 @@ func (h *userHandler) RegisterUser(c *gin.Context) {
 		c.JSON(http.StatusUnprocessableEntity, response)
 		return
 	}
-token := "token"
-	formatter := user.FormatUser(newData,token)
+	formatter := user.FormatUserRegister(newData)
 	response := helper.ApiResponse("Successfully created account", http.StatusCreated, "success", formatter)
 	c.JSON(http.StatusCreated, response)
 	return
@@ -62,8 +64,8 @@ func (h *userHandler) LoginUser(c *gin.Context) {
 		c.JSON(http.StatusUnprocessableEntity, response)
 		return
 	}
-	token := "token"
-	formatter := user.FormatUser(newData,token)
+	token ,err := h.jwtService.GenerateToken(int(newData.Id),newData.Email)
+	formatter := user.FormatUser(newData, token)
 	response := helper.ApiResponse("Login Successfully", http.StatusOK, "success", formatter)
 	c.JSON(http.StatusOK, response)
 	return
@@ -99,8 +101,7 @@ func (h *userHandler) UpdateProfile(c *gin.Context) {
 		c.JSON(http.StatusUnprocessableEntity, response)
 		return
 	}
-	token := "token"
-	formatter := user.FormatUser(newData,token)
+	formatter := user.FormatDetailUser(newData)
 	response := helper.ApiResponse("Update Profile Successfully", http.StatusOK, "success", formatter)
 	c.JSON(http.StatusOK, response)
 	return

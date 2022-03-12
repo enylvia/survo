@@ -271,7 +271,7 @@ func TestGenerateToken(t *testing.T) {
 		ExpirationHours: 2,
 	}
 
-	generatedToken, err := jwtWrapper.GenerateToken(1,"example@mail.com")
+	generatedToken, err := jwtWrapper.GenerateToken(1, "example@mail.com")
 	assert.NoError(t, err)
 
 	log.Printf("Generated Token: %s", generatedToken)
@@ -298,7 +298,7 @@ func TestGetUserById_Failed(t *testing.T) {
 	inputID := 2
 	inputIDs := strconv.Itoa(inputID)
 
-	req, _ := http.NewRequest("GET", "http://localhost:8080/api/v1/profile/"+inputIDs,nil)
+	req, _ := http.NewRequest("GET", "http://localhost:8080/api/v1/profile/"+inputIDs, nil)
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, _ := client.Do(req)
@@ -322,7 +322,7 @@ func TestGetUserById_Success(t *testing.T) {
 	inputID := 1
 	inputIDs := strconv.Itoa(inputID)
 
-	req, _ := http.NewRequest("GET", "http://localhost:8080/api/v1/profile/"+inputIDs,nil)
+	req, _ := http.NewRequest("GET", "http://localhost:8080/api/v1/profile/"+inputIDs, nil)
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := client.Do(req)
@@ -332,4 +332,21 @@ func TestGetUserById_Success(t *testing.T) {
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 	assert.Equal(t, "application/json", req.Header.Get("Content-Type"))
 
+}
+
+func TestOauthLogin(t *testing.T) {
+	log.Print("TestOauthLogin")
+	oauthStateStringGl := "https://www.googleapis.com/oauth2/v2/userinfo?access_token="
+
+	client := &http.Client{}
+	newUrl := auth.OauthConfGl.AuthCodeURL(oauthStateStringGl)
+
+	req, _ := http.NewRequest("GET", newUrl, nil)
+	_, err := client.Do(req)
+
+	assert.Equal(t, req.FormValue("client_id"),auth.OauthConfGl.ClientID)
+
+	assert.Equal(t, req.FormValue("state"), oauthStateStringGl)
+
+	assert.NoError(t, err)
 }
