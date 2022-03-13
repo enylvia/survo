@@ -78,8 +78,19 @@ func (r *googleservice) HandleCallback(c *gin.Context) {
 		http.Redirect(c.Writer, c.Request, "/api/v1/oauthlogin", http.StatusTemporaryRedirect)
 		return
 	}
-	newToken, err := JWTWrappergl.GenerateToken(int(checkIfUserExist.Id), Formatter.Email)
-	formatter := FormatGoogle(checkIfUserExist.Email, newToken)
+	newtoken := JwtWrapper{
+		SecretKey:       "survosecret",
+		Issuer:          "AuthService",
+		ExpirationHours: 2,
+	}
+	tokenString, err := newtoken.GenerateToken(int(checkIfUserExist.Id),checkIfUserExist.Email)
+	if err != nil {
+		errorMessage := gin.H{"error": err.Error()}
+		response := helper.ApiResponse("Failed to generate token", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+	formatter := FormatGoogle(checkIfUserExist.Email, tokenString)
 
 	response := helper.ApiResponse("Login Successfully", http.StatusOK, "Successfully login using Gmail", formatter)
 	c.JSON(http.StatusOK, response)

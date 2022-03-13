@@ -15,16 +15,20 @@ type LoginInput struct {
 }
 
 type UpdateInput struct {
-	FullName string `json:"fullName" binding:"required"`
-	Email	string `json:"email" binding:"required"`
-	Username string `json:"username" binding:"required"`
-	Password             string `json:"password" binding:"required"`
-	PasswordConfirmation string `json:"passwordConfirmation" binding:"required"`
-	Image string `json:"image" binding:"required"`
-	Phone string `json:"phone" binding:"required"`
-	Birthday string `json:"birthday" binding:"required"`
+	FullName             string `json:"fullName" form:"fullName"`
+	Email                string `json:"email" form:"email"`
+	Username             string `json:"username" form:"username"`
+	Password             string `json:"password" form:"password"`
+	PasswordConfirmation string `json:"passwordConfirmation" form:"passwordConfirmation"`
+	Image                string `json:"image" form:"image"`
+	Phone                string `json:"phone" form:"phone"`
+	Birthday             string `json:"birthday" form:"birthday"`
 }
 
 type DetailUserInput struct {
 	ID int `uri:"id" binding:"required"`
+}
+
+type UserImageInput struct {
+	UserId int `form:"user_id" binding:"required"`
 }

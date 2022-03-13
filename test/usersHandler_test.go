@@ -3,11 +3,14 @@ package test
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"log"
 	"net/http"
+	"net/http/httptest"
 	"strconv"
 	"survorest/auth"
+	"survorest/handler"
 	"survorest/helper"
 	"survorest/user"
 	"testing"
@@ -344,9 +347,96 @@ func TestOauthLogin(t *testing.T) {
 	req, _ := http.NewRequest("GET", newUrl, nil)
 	_, err := client.Do(req)
 
-	assert.Equal(t, req.FormValue("client_id"),auth.OauthConfGl.ClientID)
+	assert.Equal(t, req.FormValue("client_id"), auth.OauthConfGl.ClientID)
 
 	assert.Equal(t, req.FormValue("state"), oauthStateStringGl)
 
 	assert.NoError(t, err)
+}
+
+func TestMiddlewareWithNoHeader(t *testing.T) {
+	router := gin.Default()
+
+	db,_:= GetConnection()
+	authRepository := user.NewRepository(db)
+	authService := user.NewService(authRepository)
+	authHandler := handler.NewUserHandler(authService)
+
+	router.Use(auth.AuthMiddleware(authService))
+
+	router.GET("/api/v1/profile/:id",authHandler.GetProfile)
+	w := httptest.NewRecorder()
+
+
+	req, _ := http.NewRequest("GET", "/api/v1/profile/1", nil)
+	router.ServeHTTP(w, req)
+	assert.Equal(t, 401, w.Code)
+
+}
+
+func TestMiddlewareInvalidFormatToken(t *testing.T) {
+	router := gin.Default()
+
+	db,_:= GetConnection()
+	authRepository := user.NewRepository(db)
+	authService := user.NewService(authRepository)
+	authHandler := handler.NewUserHandler(authService)
+
+	router.Use(auth.AuthMiddleware(authService))
+
+	router.GET("/api/v1/profile/:id",authHandler.GetProfile)
+	w := httptest.NewRecorder()
+
+
+	req, _ := http.NewRequest("GET", "/api/v1/profile/1", nil)
+	req.Header.Set("Authorization", "TestFormatToken")
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, 401, w.Code)
+}
+
+func TestMiddlewareInvalidToken(t *testing.T) {
+	invalidToken := "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJlbWFpbCI6ImV4YW1wbGVAbWFpbC5jb20iLCJleHAiOjE2NDY0MDQ0NTksImlzcyI6IkF1dGhTZXJ2aWNlIn0.AGQ-dn4T2hXF-FLF0ZLA21qd8gmWEyarZdqYEZqiFdM"
+	//validToken := "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJlbWFpbCI6ImFkZGl0eWFwMDZAZ21haWwuY29tIiwiZXhwIjoxNjQ3MjA0MDEwLCJpc3MiOiJBdXRoU2VydmljZSJ9.4fbNOdTOOS3FWg1gVhPreyDkkyFrNwPa2uciYeEUs80"
+	router := gin.Default()
+
+	db,_:= GetConnection()
+	authRepository := user.NewRepository(db)
+	authService := user.NewService(authRepository)
+	authHandler := handler.NewUserHandler(authService)
+
+	router.Use(auth.AuthMiddleware(authService))
+
+	router.GET("/api/v1/profile/:id",authHandler.GetProfile)
+	w := httptest.NewRecorder()
+
+	req, err := http.NewRequest("GET", "/api/v1/profile/1", nil)
+	req.Header.Set("Authorization", invalidToken)
+	router.ServeHTTP(w, req)
+
+	assert.NoError(t, err)
+	assert.Equal(t, 401, w.Code)
+}
+
+func TestTokenisValid(t *testing.T) {
+	validToken := "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJlbWFpbCI6ImFkZGl0eWFwMDZAZ21haWwuY29tIiwiZXhwIjoxNjQ3MjA0MDEwLCJpc3MiOiJBdXRoU2VydmljZSJ9.4fbNOdTOOS3FWg1gVhPreyDkkyFrNwPa2uciYeEUs80"
+	router := gin.Default()
+
+	db,_:= GetConnection()
+	authRepository := user.NewRepository(db)
+	authService := user.NewService(authRepository)
+	authHandler := handler.NewUserHandler(authService)
+
+	router.Use(auth.AuthMiddleware(authService))
+
+	router.GET("/api/v1/profile/:id",authHandler.GetProfile)
+	w := httptest.NewRecorder()
+
+	req, err := http.NewRequest("GET", "/api/v1/profile/1", nil)
+	req.Header.Set("Authorization", validToken)
+	router.ServeHTTP(w, req)
+
+	assert.NoError(t, err)
+	assert.Equal(t, 200, w.Code)
 }

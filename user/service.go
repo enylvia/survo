@@ -11,6 +11,7 @@ type Service interface {
 	UpdateUserForm(inputID DetailUserInput, input UpdateInput) (User, error)
 	GetUserByEmail(email string) (User, error)
 	GetUserByID(userID int) (User, error)
+	UploadAvatar(userID int , filePath string) (User, error)
 }
 
 type service struct {
@@ -60,7 +61,7 @@ func (s *service) LoginUserForm(input LoginInput) (User, error) {
 
 }
 
-func (s *service) UpdateUserForm(inputID DetailUserInput, input UpdateInput) (User, error) {
+func (s *service) UpdateUserForm(inputID DetailUserInput, input UpdateInput,) (User, error) {
 	user, err := s.repository.FindByID(inputID.ID)
 	if err != nil {
 		return user, err
@@ -75,7 +76,6 @@ func (s *service) UpdateUserForm(inputID DetailUserInput, input UpdateInput) (Us
 	user.Password = string(hashPassword)
 	user.Phone = input.Phone
 	user.Birthday = input.Birthday
-	user.Image = input.Image
 
 	newData , err := s.repository.Update(user)
 	if err != nil {
@@ -83,6 +83,21 @@ func (s *service) UpdateUserForm(inputID DetailUserInput, input UpdateInput) (Us
 	}
 	return newData, nil
 
+}
+func (s *service)UploadAvatar(userID int , filePath string) (User, error) {
+	user, err := s.repository.FindByID(userID)
+	if err != nil {
+		return user, err
+	}
+	if user.Id == 0 {
+		return user, errors.New("user not found")
+	}
+	user.Image = filePath
+	newData , err := s.repository.Update(user)
+	if err != nil {
+		return newData, err
+	}
+	return newData, nil
 }
 
 func (s *service)GetUserByEmail(email string) (User, error){

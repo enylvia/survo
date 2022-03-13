@@ -1,13 +1,17 @@
 package user
 
+import "time"
+
 type User struct {
-	Id         int64  `json:"id" gorm:"primaryKey; not null"`
-	FullName   string `json:"fullName" gorm:"type:varchar(100); not null"`
-	Email      string `json:"email" gorm:"type:varchar(100); not null"`
-	Username   string `json:"username"  gorm:"type:varchar(100); not null"`
-	Occupation string `json:"occupation" gorm:"type:varchar(100); not null"`
-	Password   string `json:"password" gorm:"type:varchar(100); not null"`
-	Image      string `json:"image" gorm:"type:varchar(100); nullable"`
-	Phone      string `json:"phone" gorm:"type:varchar(100); nullable"`
-	Birthday   string `json:"birthday" gorm:"type:varchar(100); nullable"`
+	Id         int64 `gorm:"primaryKey; not null"`
+	FullName   string `gorm:"type:varchar(100); not null"`
+	Email      string `gorm:"type:varchar(100); not null"`
+	Username   string `gorm:"type:varchar(100); not null"`
+	Occupation string `gorm:"type:varchar(100); not null"`
+	Password   string `gorm:"type:varchar(100); not null"`
+	Image      string `gorm:"type:varchar(100); nullable"`
+	Phone      string `gorm:"type:varchar(100); nullable"`
+	Birthday   string `gorm:"type:varchar(100); nullable"`
+	CreatedAt	time.Time
+	UpdatedAt	time.Time
 }

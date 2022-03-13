@@ -20,19 +20,24 @@ func main() {
 	}
 	userRepository := user.NewRepository(db)
 	userService := user.NewService(userRepository)
-	authService := auth.NewService
-	userHandler := handler.NewUserHandler(userService,authService())
+	userHandler := handler.NewUserHandler(userService)
 	googleHandler := auth.GoogleService(userRepository)
 	router := gin.Default()
-	api := router.Group("/api/v1")
+	//router.Use(cors.Default())
 
+	// static image route
+	router.Static("/images", "./images")
+	api := router.Group("/api/v1")
 	api.POST("/register", userHandler.RegisterUser)
 	api.POST("/login", userHandler.LoginUser)
-	api.PUT("/update/:id", userHandler.UpdateProfile)
-	api.GET("/profile/:id", userHandler.GetProfile)
 
-	api.GET("/oauthlogin", auth.HandleLogin)
-	api.GET("/callback", googleHandler.HandleCallback)
+	protected := router.Use(auth.AuthMiddleware(userService)) // protect all routes
+		protected.PUT("/update/:id", userHandler.UpdateProfile)
+		protected.PUT("/upload/:id", userHandler.UploadAvatar)
+		protected.GET("/profile/:id", userHandler.GetProfile)
+
+		protected.GET("/oauthlogin", auth.HandleLogin)
+		protected.GET("/callback", googleHandler.HandleCallback)
 
 	router.Run(":8080")
 }
