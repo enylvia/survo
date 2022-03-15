@@ -20,7 +20,6 @@ type UpdateInput struct {
 	Username             string `json:"username" form:"username"`
 	Password             string `json:"password" form:"password"`
 	PasswordConfirmation string `json:"passwordConfirmation" form:"passwordConfirmation"`
-	Image                string `json:"image" form:"image"`
 	Phone                string `json:"phone" form:"phone"`
 	Birthday             string `json:"birthday" form:"birthday"`
 }

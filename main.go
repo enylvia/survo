@@ -30,14 +30,14 @@ func main() {
 	api := router.Group("/api/v1")
 	api.POST("/register", userHandler.RegisterUser)
 	api.POST("/login", userHandler.LoginUser)
+	api.GET("/oauthlogin", auth.HandleLogin)
+	api.GET("/callback", googleHandler.HandleCallback)
 
-	protected := router.Use(auth.AuthMiddleware(userService)) // protect all routes
-		protected.PUT("/update/:id", userHandler.UpdateProfile)
-		protected.PUT("/upload/:id", userHandler.UploadAvatar)
-		protected.GET("/profile/:id", userHandler.GetProfile)
-
-		protected.GET("/oauthlogin", auth.HandleLogin)
-		protected.GET("/callback", googleHandler.HandleCallback)
+	//Change grouping
+	api.Use(auth.AuthMiddleware(userService)) // protect all routes
+		api.PUT("/update/:id", userHandler.UpdateProfile)
+		api.PUT("/upload/:id", userHandler.UploadAvatar)
+		api.GET("/profile/:id", userHandler.GetProfile)
 
 	router.Run(":8080")
 }

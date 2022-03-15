@@ -5,31 +5,67 @@ import (
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"net/http/httptest"
-	"strconv"
 	"survorest/auth"
 	"survorest/handler"
-	"survorest/helper"
 	"survorest/user"
 	"testing"
 )
 
+func getRouter() *gin.Engine{
+	gin.SetMode(gin.ReleaseMode)
+	r := gin.Default()
+	return r
+}
+
+func GenerateJWT(id int , email string) (token string,err error){
+	jwtWrapper := auth.JwtWrapper{
+		SecretKey:       "survosecret",
+		Issuer:          "AuthService",
+		ExpirationHours: 2,
+	}
+
+	generatedToken, err := jwtWrapper.GenerateToken(id, email)
+	if err != nil {
+		return "",err
+	}
+	return generatedToken,nil
+}
+func GetConnection() (*gorm.DB, error) {
+	dsn := "root:@tcp(127.0.0.1:3306)/survo?charset=utf8mb4&parseTime=True&loc=Local"
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	if err != nil {
+		return nil, err
+	}
+	return db, nil
+}
+
+func MigrateTable(db *gorm.DB) {
+	if db.Migrator().HasTable("users") {
+		db.Migrator().DropTable("users")
+		log.Printf("Table users dropped")
+		return
+	}
+	db.Migrator().CreateTable(&user.User{})
+}
+
+func TruncateTable(db *gorm.DB) {
+	db.Migrator().DropTable("users")
+}
 func TestRegisterUser_ValidationForm(t *testing.T) {
-
-	log.Print("TestRegisterUser_ValidationFormFailed")
-
-	db, err := GetConnection()
-	helper.ErrorNotNil(err)
+	router := getRouter()
+	db, _ := GetConnection()
+	authRepository := user.NewRepository(db)
+	authService := user.NewService(authRepository)
+	userHandler := handler.NewUserHandler(authService)
 
 	MigrateTable(db)
-	defer TruncateTable(db)
-
-	client := &http.Client{}
-
-	//var bodyData []user.UserFormatter
-
+	router.POST("/api/v1/register", userHandler.RegisterUser)
+	w := httptest.NewRecorder()
 	input := user.RegisterInput{
 		FullName:             "john doe",
 		Email:                "",
@@ -40,74 +76,68 @@ func TestRegisterUser_ValidationForm(t *testing.T) {
 	}
 	var buf bytes.Buffer
 
-	err = json.NewEncoder(&buf).Encode(input)
+	err := json.NewEncoder(&buf).Encode(input)
 	if err != nil {
 		log.Fatal(err)
 	}
 	req, err := http.NewRequest("POST", "http://localhost:8080/api/v1/register", &buf)
 
 	req.Header.Set("Content-Type", "application/json")
+	router.ServeHTTP(w, req)
 
-	resp, err := client.Do(req)
-
-	defer resp.Body.Close()
-
-	assert.Equal(t, http.StatusUnprocessableEntity, resp.StatusCode)
-	assert.Equal(t, "application/json", req.Header.Get("Content-Type"))
-
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusUnprocessableEntity, w.Code, "Status code should be 422")
+	assert.Equal(t, "application/json", req.Header.Get("Content-Type"), "Content-Type should be application/json")
 }
 
 func TestRegisterUser_ValidationFormSuccess(t *testing.T) {
+	router := getRouter()
 
-	log.Print("TestRegisterUser_ValidationFormSuccess")
-	db, err := GetConnection()
-	helper.ErrorNotNil(err)
+	db, _ := GetConnection()
+	authRepository := user.NewRepository(db)
+	authService := user.NewService(authRepository)
+	userHandler := handler.NewUserHandler(authService)
 
-	MigrateTable(db)
-	defer TruncateTable(db)
-
-	client := &http.Client{}
-
+	router.POST("/api/v1/register", userHandler.RegisterUser)
+	w := httptest.NewRecorder()
 	input := user.RegisterInput{
-		FullName:             "john doe",
-		Email:                "example@mail.com",
+		FullName:             "johns doe",
+		Email:                "johns@mail.com",
 		Username:             "example",
 		Occupation:           "Software Engineer",
-		Password:             "12345678",
-		PasswordConfirmation: "12345678",
+		Password:             "123456789",
+		PasswordConfirmation: "123456789",
 	}
 	var buf bytes.Buffer
 
-	err = json.NewEncoder(&buf).Encode(input)
+	err := json.NewEncoder(&buf).Encode(input)
 	if err != nil {
 		log.Fatal(err)
 	}
 	req, err := http.NewRequest("POST", "http://localhost:8080/api/v1/register", &buf)
 
 	req.Header.Set("Content-Type", "application/json")
+	router.ServeHTTP(w, req)
 
-	resp, err := client.Do(req)
-
-	defer resp.Body.Close()
-
-	assert.Equal(t, http.StatusCreated, resp.StatusCode)
-	assert.Equal(t, "application/json", req.Header.Get("Content-Type"))
-
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusCreated, w.Code, "Status code should be 201")
+	assert.Equal(t, "application/json", req.Header.Get("Content-Type"), "Content-Type should be application/json")
 }
 
 func TestRegisterUser_CreatUserSuccess(t *testing.T) {
 
-	log.Print("TestRegisterUser_CreateUserSuccess")
-	db, err := GetConnection()
-	helper.ErrorNotNil(err)
+	router := getRouter()
 
-	MigrateTable(db)
+	db, _ := GetConnection()
+	authRepository := user.NewRepository(db)
+	authService := user.NewService(authRepository)
+	userHandler := handler.NewUserHandler(authService)
 
-	client := &http.Client{}
-
+	router.POST("/api/v1/register", userHandler.RegisterUser)
+	w := httptest.NewRecorder()
 	input := user.RegisterInput{
 		FullName:             "john doe",
-		Email:                "example@mail.com",
+		Email:                "john@mail.com",
 		Username:             "example",
 		Occupation:           "Software Engineer",
 		Password:             "12345678",
@@ -115,28 +145,30 @@ func TestRegisterUser_CreatUserSuccess(t *testing.T) {
 	}
 	var buf bytes.Buffer
 
-	err = json.NewEncoder(&buf).Encode(input)
+	err := json.NewEncoder(&buf).Encode(input)
 	if err != nil {
 		log.Fatal(err)
 	}
 	req, err := http.NewRequest("POST", "http://localhost:8080/api/v1/register", &buf)
 
 	req.Header.Set("Content-Type", "application/json")
+	router.ServeHTTP(w, req)
 
-	resp, err := client.Do(req)
-
-	defer resp.Body.Close()
-
-	assert.Equal(t, http.StatusCreated, resp.StatusCode)
-	assert.Equal(t, "application/json", req.Header.Get("Content-Type"))
-
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusCreated, w.Code, "Status code should be 201")
+	assert.Equal(t, "application/json", req.Header.Get("Content-Type"), "Content-Type should be application/json")
 }
 
 func TestLoginUser_ValidationFailed(t *testing.T) {
-	log.Print("TestRegisterUser_CreateUserSuccess")
+	router := getRouter()
 
-	client := &http.Client{}
+	db, _ := GetConnection()
+	authRepository := user.NewRepository(db)
+	authService := user.NewService(authRepository)
+	userHandler := handler.NewUserHandler(authService)
 
+	router.POST("/api/v1/login", userHandler.LoginUser)
+	w := httptest.NewRecorder()
 	input := user.LoginInput{
 		Email:    "",
 		Password: "12345678",
@@ -150,22 +182,26 @@ func TestLoginUser_ValidationFailed(t *testing.T) {
 	req, err := http.NewRequest("POST", "http://localhost:8080/api/v1/login", &buf)
 
 	req.Header.Set("Content-Type", "application/json")
+	router.ServeHTTP(w, req)
 
-	resp, err := client.Do(req)
-
-	defer resp.Body.Close()
-
-	assert.Equal(t, http.StatusUnprocessableEntity, resp.StatusCode)
-	assert.Equal(t, "application/json", req.Header.Get("Content-Type"))
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusUnprocessableEntity, w.Code, "Status code should be 422")
+	assert.Equal(t, "application/json", req.Header.Get("Content-Type"), "Content-Type should be application/json")
 }
 
 func TestLoginUser_ValidationAndLoginSuccess(t *testing.T) {
-	log.Print("TestRegisterUser_ValidationAndLoginSuccess")
-	client := &http.Client{}
+	router := getRouter()
 
+	db, _ := GetConnection()
+	authRepository := user.NewRepository(db)
+	authService := user.NewService(authRepository)
+	userHandler := handler.NewUserHandler(authService)
+
+	router.POST("/api/v1/login", userHandler.LoginUser)
+	w := httptest.NewRecorder()
 	input := user.LoginInput{
-		Email:    "example@mail.com",
-		Password: "12345678",
+		Email:    "johns@mail.com",
+		Password: "123456789",
 	}
 	var buf bytes.Buffer
 
@@ -176,94 +212,103 @@ func TestLoginUser_ValidationAndLoginSuccess(t *testing.T) {
 	req, err := http.NewRequest("POST", "http://localhost:8080/api/v1/login", &buf)
 
 	req.Header.Set("Content-Type", "application/json")
+	router.ServeHTTP(w, req)
 
-	resp, err := client.Do(req)
-
-	defer resp.Body.Close()
-
-	assert.Equal(t, http.StatusOK, resp.StatusCode)
-	assert.Equal(t, "application/json", req.Header.Get("Content-Type"))
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, w.Code, "Status code should be 200")
+	assert.Equal(t, "application/json", req.Header.Get("Content-Type"), "Content-Type should be application/json")
 }
 
-func TestUpdateUser_FormValidation(t *testing.T) {
-	log.Print("TestUpdateUser_FormValidation")
-	client := &http.Client{}
+func TestUpdateUser_InvalidToken(t *testing.T) {
+	router := getRouter()
 
-	inputID := 1
-	inputIDs := strconv.Itoa(inputID)
+	db, _ := GetConnection()
+	authRepository := user.NewRepository(db)
+	authService := user.NewService(authRepository)
+	userHandler := handler.NewUserHandler(authService)
+	var inputID string
+	inputID = "2"
 
-	inputData := user.UpdateInput{
-		FullName:             "",
+	invalidToken := "token"
+
+	router.Use(auth.AuthMiddleware(authService))
+
+	router.PUT("/api/v1/update/:id", userHandler.UpdateProfile)
+	w := httptest.NewRecorder()
+	newData := user.UpdateInput{
+		FullName:             "New John",
 		Email:                "example@mail.com",
 		Username:             "example",
 		Password:             "12345678",
 		PasswordConfirmation: "12345678",
-		Image:                "image.jpg",
 		Phone:                "081234567882",
 		Birthday:             "06-01-2001",
 	}
-
 	var buf bytes.Buffer
 
-	err := json.NewEncoder(&buf).Encode(inputData)
-
+	err := json.NewEncoder(&buf).Encode(newData)
 	if err != nil {
 		log.Fatal(err)
 	}
+	req, err := http.NewRequest("PUT", "http://localhost:8080/api/v1/update/"+inputID, &buf)
 
-	req, _ := http.NewRequest("PUT", "http://localhost:8080/api/v1/update/"+inputIDs, &buf)
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", invalidToken)
 
-	resp, err := client.Do(req)
+	router.ServeHTTP(w, req)
 
-	defer resp.Body.Close()
-
-	assert.Equal(t, http.StatusUnprocessableEntity, resp.StatusCode)
-	assert.Equal(t, "application/json", req.Header.Get("Content-Type"))
-
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusUnauthorized, w.Code, "Status code should be 401")
+	assert.Equal(t, "application/json", req.Header.Get("Content-Type"), "Content-Type should be application/json")
 }
-
 func TestUpdateUser_Success(t *testing.T) {
-	log.Print("TestUpdateUser_Success")
-	//db, err := GetConnection()
-	//helper.ErrorNotNil(err)
-	//
-	//defer TruncateTable(db)
+	router := getRouter()
 
-	client := &http.Client{}
+	db, _ := GetConnection()
+	authRepository := user.NewRepository(db)
+	authService := user.NewService(authRepository)
+	userHandler := handler.NewUserHandler(authService)
+	var inputID string
+	inputID = "2"
 
-	inputID := 1
-	inputIDs := strconv.Itoa(inputID)
+	jwtWrapper := auth.JwtWrapper{
+		SecretKey:       "survosecret",
+		Issuer:          "AuthService",
+		ExpirationHours: 2,
+	}
 
-	inputData := user.UpdateInput{
-		FullName:             "Aditya",
+	generatedToken, _:= jwtWrapper.GenerateToken(2, "johns@mail.com")
+	validToken := "Bearer "+generatedToken
+
+	router.Use(auth.AuthMiddleware(authService))
+
+	router.PUT("/api/v1/update/:id", userHandler.UpdateProfile)
+	w := httptest.NewRecorder()
+	newData := user.UpdateInput{
+		FullName:             "New John",
 		Email:                "example@mail.com",
 		Username:             "example",
 		Password:             "12345678",
 		PasswordConfirmation: "12345678",
-		Image:                "image.jpg",
 		Phone:                "081234567882",
 		Birthday:             "06-01-2001",
 	}
-
 	var buf bytes.Buffer
 
-	err := json.NewEncoder(&buf).Encode(inputData)
-
+	err := json.NewEncoder(&buf).Encode(newData)
 	if err != nil {
 		log.Fatal(err)
 	}
+	req, err := http.NewRequest("PUT", "http://localhost:8080/api/v1/update/"+inputID, &buf)
 
-	req, _ := http.NewRequest("PUT", "http://localhost:8080/api/v1/update/"+inputIDs, &buf)
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", validToken)
 
-	resp, err := client.Do(req)
+	router.ServeHTTP(w, req)
 
-	defer resp.Body.Close()
-
-	assert.Equal(t, http.StatusOK, resp.StatusCode)
-	assert.Equal(t, "application/json", req.Header.Get("Content-Type"))
-
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, w.Code, "Status code should be 200")
+	assert.Equal(t, "application/json", req.Header.Get("Content-Type"), "Content-Type should be application/json")
 }
 
 func TestGenerateToken(t *testing.T) {
@@ -274,66 +319,96 @@ func TestGenerateToken(t *testing.T) {
 		ExpirationHours: 2,
 	}
 
-	generatedToken, err := jwtWrapper.GenerateToken(1, "example@mail.com")
+	generatedToken, err := jwtWrapper.GenerateToken(1, "john@mail.com")
 	assert.NoError(t, err)
 
 	log.Printf("Generated Token: %s", generatedToken)
 }
 
 func TestValidateJwtToken(t *testing.T) {
-	signedToken := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJlbWFpbCI6ImV4YW1wbGVAbWFpbC5jb20iLCJleHAiOjE2NDY0MDQ0NTksImlzcyI6IkF1dGhTZXJ2aWNlIn0.MGaWz61vXAlu91E56F0M49Y7J2rlkEcTMqzJy4kQOUY"
 	jwtWrapper := auth.JwtWrapper{
 		SecretKey: "survosecret",
 		Issuer:    "AuthService",
 	}
+	generateToken,_ := jwtWrapper.GenerateToken(1,"john@mail.com")
+	signedToken := generateToken
 
 	claims, err := jwtWrapper.ValidateToken(signedToken)
 	assert.NoError(t, err)
 	assert.Equal(t, 1, claims.UserID)
-	assert.Equal(t, "example@mail.com", claims.Email)
+	assert.Equal(t, "john@mail.com", claims.Email)
 	assert.Equal(t, "AuthService", claims.Issuer)
 }
 
-func TestGetUserById_Failed(t *testing.T) {
-	log.Print("TestGetUserById_Failed")
-	client := &http.Client{}
+func TestGetUserById_FailedNotAuthorization(t *testing.T) {
+	router := getRouter()
 
-	inputID := 2
-	inputIDs := strconv.Itoa(inputID)
+	db, _ := GetConnection()
+	authRepository := user.NewRepository(db)
+	authService := user.NewService(authRepository)
+	userHandler := handler.NewUserHandler(authService)
+	var inputID string
+	inputID = "1"
 
-	req, _ := http.NewRequest("GET", "http://localhost:8080/api/v1/profile/"+inputIDs, nil)
+	jwtWrapper := auth.JwtWrapper{
+		SecretKey:       "survosecret",
+		Issuer:          "AuthService",
+		ExpirationHours: 2,
+	}
+
+	generatedToken, _:= jwtWrapper.GenerateToken(2, "johns@mail.com")
+	validToken := "Bearer "+generatedToken
+
+	router.Use(auth.AuthMiddleware(authService))
+
+	router.GET("/api/v1/profile/:id", userHandler.GetProfile)
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest("GET", "http://localhost:8080/api/v1/profile/"+inputID, nil)
+
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", validToken)
 
-	resp, _ := client.Do(req)
+	router.ServeHTTP(w, req)
 
-	defer resp.Body.Close()
-
-	assert.Equal(t, http.StatusUnprocessableEntity, resp.StatusCode)
-	assert.Equal(t, "application/json", req.Header.Get("Content-Type"))
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusUnauthorized, w.Code, "Status code should be 401")
+	assert.Equal(t, "application/json", req.Header.Get("Content-Type"), "Content-Type should be application/json")
 
 }
-
 func TestGetUserById_Success(t *testing.T) {
-	log.Print("TestGetUserById_Success")
-	db, err := GetConnection()
-	helper.ErrorNotNil(err)
+	router := getRouter()
 
-	defer TruncateTable(db)
+	db, _ := GetConnection()
+	authRepository := user.NewRepository(db)
+	authService := user.NewService(authRepository)
+	userHandler := handler.NewUserHandler(authService)
+	var inputID string
+	inputID = "2"
 
-	client := &http.Client{}
+	jwtWrapper := auth.JwtWrapper{
+		SecretKey:       "survosecret",
+		Issuer:          "AuthService",
+		ExpirationHours: 2,
+	}
 
-	inputID := 1
-	inputIDs := strconv.Itoa(inputID)
+	generatedToken, _:= jwtWrapper.GenerateToken(2, "johns@mail.com")
+	validToken := "Bearer "+generatedToken
 
-	req, _ := http.NewRequest("GET", "http://localhost:8080/api/v1/profile/"+inputIDs, nil)
+	router.Use(auth.AuthMiddleware(authService))
+
+	router.GET("/api/v1/profile/:id", userHandler.GetProfile)
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest("GET", "http://localhost:8080/api/v1/profile/"+inputID, nil)
+
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", validToken)
 
-	resp, err := client.Do(req)
+	router.ServeHTTP(w, req)
 
-	defer resp.Body.Close()
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, w.Code, "Status code should be 200")
+	assert.Equal(t, "application/json", req.Header.Get("Content-Type"), "Content-Type should be application/json")
 
-	assert.Equal(t, http.StatusOK, resp.StatusCode)
-	assert.Equal(t, "application/json", req.Header.Get("Content-Type"))
 
 }
 
@@ -357,16 +432,15 @@ func TestOauthLogin(t *testing.T) {
 func TestMiddlewareWithNoHeader(t *testing.T) {
 	router := gin.Default()
 
-	db,_:= GetConnection()
+	db, _ := GetConnection()
 	authRepository := user.NewRepository(db)
 	authService := user.NewService(authRepository)
 	authHandler := handler.NewUserHandler(authService)
 
 	router.Use(auth.AuthMiddleware(authService))
 
-	router.GET("/api/v1/profile/:id",authHandler.GetProfile)
+	router.GET("/api/v1/profile/:id", authHandler.GetProfile)
 	w := httptest.NewRecorder()
-
 
 	req, _ := http.NewRequest("GET", "/api/v1/profile/1", nil)
 	router.ServeHTTP(w, req)
@@ -377,16 +451,15 @@ func TestMiddlewareWithNoHeader(t *testing.T) {
 func TestMiddlewareInvalidFormatToken(t *testing.T) {
 	router := gin.Default()
 
-	db,_:= GetConnection()
+	db, _ := GetConnection()
 	authRepository := user.NewRepository(db)
 	authService := user.NewService(authRepository)
 	authHandler := handler.NewUserHandler(authService)
 
 	router.Use(auth.AuthMiddleware(authService))
 
-	router.GET("/api/v1/profile/:id",authHandler.GetProfile)
+	router.GET("/api/v1/profile/:id", authHandler.GetProfile)
 	w := httptest.NewRecorder()
-
 
 	req, _ := http.NewRequest("GET", "/api/v1/profile/1", nil)
 	req.Header.Set("Authorization", "TestFormatToken")
@@ -398,17 +471,16 @@ func TestMiddlewareInvalidFormatToken(t *testing.T) {
 
 func TestMiddlewareInvalidToken(t *testing.T) {
 	invalidToken := "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJlbWFpbCI6ImV4YW1wbGVAbWFpbC5jb20iLCJleHAiOjE2NDY0MDQ0NTksImlzcyI6IkF1dGhTZXJ2aWNlIn0.AGQ-dn4T2hXF-FLF0ZLA21qd8gmWEyarZdqYEZqiFdM"
-	//validToken := "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJlbWFpbCI6ImFkZGl0eWFwMDZAZ21haWwuY29tIiwiZXhwIjoxNjQ3MjA0MDEwLCJpc3MiOiJBdXRoU2VydmljZSJ9.4fbNOdTOOS3FWg1gVhPreyDkkyFrNwPa2uciYeEUs80"
 	router := gin.Default()
 
-	db,_:= GetConnection()
+	db, _ := GetConnection()
 	authRepository := user.NewRepository(db)
 	authService := user.NewService(authRepository)
 	authHandler := handler.NewUserHandler(authService)
 
 	router.Use(auth.AuthMiddleware(authService))
 
-	router.GET("/api/v1/profile/:id",authHandler.GetProfile)
+	router.GET("/api/v1/profile/:id", authHandler.GetProfile)
 	w := httptest.NewRecorder()
 
 	req, err := http.NewRequest("GET", "/api/v1/profile/1", nil)
@@ -420,17 +492,24 @@ func TestMiddlewareInvalidToken(t *testing.T) {
 }
 
 func TestTokenisValid(t *testing.T) {
-	validToken := "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJlbWFpbCI6ImFkZGl0eWFwMDZAZ21haWwuY29tIiwiZXhwIjoxNjQ3MjA0MDEwLCJpc3MiOiJBdXRoU2VydmljZSJ9.4fbNOdTOOS3FWg1gVhPreyDkkyFrNwPa2uciYeEUs80"
+	jwtWrapper := auth.JwtWrapper{
+		SecretKey:       "survosecret",
+		Issuer:          "AuthService",
+		ExpirationHours: 2,
+	}
+
+	generatedToken, _:= jwtWrapper.GenerateToken(1, "john@mail.com")
+	validToken := "Bearer "+generatedToken
 	router := gin.Default()
 
-	db,_:= GetConnection()
+	db, _ := GetConnection()
 	authRepository := user.NewRepository(db)
 	authService := user.NewService(authRepository)
 	authHandler := handler.NewUserHandler(authService)
 
 	router.Use(auth.AuthMiddleware(authService))
 
-	router.GET("/api/v1/profile/:id",authHandler.GetProfile)
+	router.GET("/api/v1/profile/:id", authHandler.GetProfile)
 	w := httptest.NewRecorder()
 
 	req, err := http.NewRequest("GET", "/api/v1/profile/1", nil)
@@ -439,4 +518,8 @@ func TestTokenisValid(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Equal(t, 200, w.Code)
+}
+func TestTruncateTable(t *testing.T) {
+	db, _ := GetConnection()
+	TruncateTable(db)
 }

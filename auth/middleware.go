@@ -35,13 +35,7 @@ func AuthMiddleware(authService user.Service) gin.HandlerFunc {
 			return
 		}
 		userID := claims.UserID
-		user , err := authService.GetUserByID(userID)
-
-		if err != nil {
-			response := helper.ApiResponse("Unauthorize", http.StatusUnauthorized, "error", nil)
-			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
-			return
-		}
+		user , _ := authService.GetUserByID(userID)
 		c.Set("claims",user)
 	}
 }

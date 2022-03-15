@@ -72,6 +72,13 @@ func (s *service) UpdateUserForm(inputID DetailUserInput, input UpdateInput,) (U
 	user.FullName = input.FullName
 	user.Email = input.Email
 	user.Username = input.Username
+	if input.Password == ""{
+		return user , errors.New("please input your password")
+	}
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password))
+	if err != nil {
+		return user, errors.New("password is incorrect")
+	}
 	hashPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.MinCost)
 	user.Password = string(hashPassword)
 	user.Phone = input.Phone

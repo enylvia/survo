@@ -96,14 +96,6 @@ func (h *userHandler) UpdateProfile(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, response)
 		return
 	}
-	if err != nil {
-		errors := helper.FormatValidationError(err)
-		errorMessage := gin.H{"errors": errors}
-
-		response := helper.ApiResponse("Failed to update profile", http.StatusUnprocessableEntity, "error", errorMessage)
-		c.JSON(http.StatusUnprocessableEntity, response)
-		return
-	}
 	var inputData user.UpdateInput
 	err = c.ShouldBindJSON(&inputData)
 	newData, err := h.userService.UpdateUserForm(inputID, inputData)
@@ -118,7 +110,6 @@ func (h *userHandler) UpdateProfile(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 	return
 }
-
 func (h *userHandler) UploadAvatar (c *gin.Context){
 	var inputID user.DetailUserInput
 	currentUser := c.MustGet("claims").(user.User)
@@ -166,8 +157,20 @@ func (h *userHandler) UploadAvatar (c *gin.Context){
 }
 func (h *userHandler) GetProfile(c *gin.Context) {
 	var inputID user.DetailUserInput
+	currentUser := c.MustGet("claims").(user.User)
+
+	var userId int
+	userId = int(currentUser.Id)
 
 	err := c.ShouldBindUri(&inputID)
+
+	if userId != inputID.ID {
+		errorMessage := gin.H{"error": "You are not authorized to see this user profile"}
+		response := helper.ApiResponse("You are not authorized to see this user profile", http.StatusUnauthorized, "error", errorMessage)
+		c.JSON(http.StatusUnauthorized, response)
+		return
+	}
+
 	if err != nil {
 		errors := helper.FormatValidationError(err)
 		errorMessage := gin.H{"errors": errors}
