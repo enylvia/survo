@@ -15,3 +15,10 @@ type User struct {
 	CreatedAt	time.Time
 	UpdatedAt	time.Time
 }
+
+type Attribut struct {
+	Id         	int64 `gorm:"primaryKey; not null"`
+	UserId     	uint `gorm:"not null"`
+	IsPremium 	bool `gorm:"not null"`
+	Balance 	int `gorm:"not null"`
+}

@@ -51,10 +51,14 @@ func MigrateTable(db *gorm.DB) {
 		return
 	}
 	db.Migrator().CreateTable(&user.User{})
+	db.Migrator().CreateTable(&user.Attribut{})
 }
-
 func TruncateTable(db *gorm.DB) {
 	db.Migrator().DropTable("users")
+}
+func TestMigrate(t *testing.T) {
+	db ,_ := GetConnection()
+	MigrateTable(db)
 }
 func TestRegisterUser_ValidationForm(t *testing.T) {
 	router := getRouter()
