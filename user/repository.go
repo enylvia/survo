@@ -9,6 +9,9 @@ type Repository interface {
 	FindByEmail(email string) (User, error)
 	FindByID(id int) (User, error)
 	Update(user User) (User, error)
+	CreateAttribut(attribut Attribut)
+	UpdateAttribut(attribut Attribut)
+
 }
 
 type repository struct {
@@ -40,7 +43,8 @@ func (r *repository) FindByEmail(email string) (User, error) {
 
 func (r *repository) FindByID(id int) (User, error) {
 	var user User
-	err := r.db.Where("id = ?", id).First(&user).Error
+	//var attrib Attribut
+	err := r.db.Preload("Attribut").Where("id = ?",id).Find(&user).Error
 	if err != nil {
 		return user,err
 	}
@@ -53,6 +57,22 @@ func (r *repository) Update(user User) (User, error) {
 		return user, err
 	}
 	return user,nil
+}
+
+func (r *repository) CreateAttribut (attribut Attribut){
+	err := r.db.Create(&attribut).Error
+	if err != nil {
+		return
+	}
+	return
+}
+
+func (r *repository) UpdateAttribut(attribut Attribut){
+	err := r.db.Save(&attribut).Error
+	if err != nil {
+		return
+	}
+	return
 }
 
 

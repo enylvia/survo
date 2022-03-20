@@ -45,8 +45,10 @@ func GetConnection() (*gorm.DB, error) {
 }
 
 func MigrateTable(db *gorm.DB) {
-	if db.Migrator().HasTable("users") {
+	if db.Migrator().HasTable("users") || db.Migrator().HasTable("attributs") {
+
 		db.Migrator().DropTable("users")
+		db.Migrator().DropTable("attributs")
 		log.Printf("Table users dropped")
 		return
 	}
@@ -55,6 +57,7 @@ func MigrateTable(db *gorm.DB) {
 }
 func TruncateTable(db *gorm.DB) {
 	db.Migrator().DropTable("users")
+	db.Migrator().DropTable("attributs")
 }
 func TestMigrate(t *testing.T) {
 	db ,_ := GetConnection()

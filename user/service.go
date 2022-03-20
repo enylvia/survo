@@ -31,11 +31,19 @@ func (s *service) RegisterUserForm(input RegisterInput) (User, error) {
 	user.Occupation = input.Occupation
 	hashPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.MinCost)
 	user.Password = string(hashPassword)
-
 	data, err := s.repository.Create(user)
 	if err != nil {
 		return data, err
 	}
+	var attrib Attribut
+	attrib.UserId = uint(data.Id)
+	attrib.PostedSurvey = 0
+	attrib.TotalRespondent = 0
+	attrib.ParticipateSurvey = 0
+	attrib.IsPremium = false
+	attrib.Balance = 0
+	s.repository.CreateAttribut(attrib)
+
 	return data, nil
 
 }
