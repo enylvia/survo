@@ -140,7 +140,7 @@ func (h *userHandler) UploadAvatar (c *gin.Context){
 	if err != nil {
 		errorMessage := gin.H{"error": err.Error()}
 		response := helper.ApiResponse("Failed to save uploaded image", http.StatusBadRequest, "error", errorMessage)
-		c.JSON(http.StatusUnprocessableEntity, response)
+		c.JSON(http.StatusBadRequest, response)
 		return
 	}
 	newData, err := h.userService.UploadAvatar(inputID.ID, pathFile)

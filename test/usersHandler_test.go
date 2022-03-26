@@ -3,10 +3,12 @@ package test
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -16,13 +18,13 @@ import (
 	"testing"
 )
 
-func getRouter() *gin.Engine{
+func getRouter() *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 	return r
 }
 
-func GenerateJWT(id int , email string) (token string,err error){
+func GenerateJWT(id int, email string) (token string, err error) {
 	jwtWrapper := auth.JwtWrapper{
 		SecretKey:       "survosecret",
 		Issuer:          "AuthService",
@@ -31,9 +33,9 @@ func GenerateJWT(id int , email string) (token string,err error){
 
 	generatedToken, err := jwtWrapper.GenerateToken(id, email)
 	if err != nil {
-		return "",err
+		return "", err
 	}
-	return generatedToken,nil
+	return generatedToken, nil
 }
 func GetConnection() (*gorm.DB, error) {
 	dsn := "root:@tcp(127.0.0.1:3306)/survo?charset=utf8mb4&parseTime=True&loc=Local"
@@ -59,8 +61,9 @@ func TruncateTable(db *gorm.DB) {
 	db.Migrator().DropTable("users")
 	db.Migrator().DropTable("attributs")
 }
+
 func TestMigrate(t *testing.T) {
-	db ,_ := GetConnection()
+	db, _ := GetConnection()
 	MigrateTable(db)
 }
 func TestRegisterUser_ValidationForm(t *testing.T) {
@@ -91,10 +94,14 @@ func TestRegisterUser_ValidationForm(t *testing.T) {
 
 	req.Header.Set("Content-Type", "application/json")
 	router.ServeHTTP(w, req)
+	var responseBody map[string]interface{}
+	body, _ := ioutil.ReadAll(w.Body)
+
+	json.Unmarshal(body, &responseBody)
 
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusUnprocessableEntity, w.Code, "Status code should be 422")
-	assert.Equal(t, "application/json", req.Header.Get("Content-Type"), "Content-Type should be application/json")
+	assert.Equal(t, "Key: 'RegisterInput.Email' Error:Field validation for 'Email' failed on the 'required' tag", responseBody["data"].(map[string]interface{})["errors"].([]interface{})[0].(string))
 }
 
 func TestRegisterUser_ValidationFormSuccess(t *testing.T) {
@@ -109,7 +116,7 @@ func TestRegisterUser_ValidationFormSuccess(t *testing.T) {
 	w := httptest.NewRecorder()
 	input := user.RegisterInput{
 		FullName:             "johns doe",
-		Email:                "johns@mail.com",
+		Email:                "johse@mail.com",
 		Username:             "example",
 		Occupation:           "Software Engineer",
 		Password:             "123456789",
@@ -126,9 +133,16 @@ func TestRegisterUser_ValidationFormSuccess(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 	router.ServeHTTP(w, req)
 
+	var responseBody map[string]interface{}
+	body, _ := ioutil.ReadAll(w.Body)
+
+	json.Unmarshal(body, &responseBody)
+
+	fmt.Println(responseBody)
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusCreated, w.Code, "Status code should be 201")
-	assert.Equal(t, "application/json", req.Header.Get("Content-Type"), "Content-Type should be application/json")
+	assert.Equal(t, "success", responseBody["meta"].(map[string]interface{})["status"], "Status code should be success")
+	assert.Equal(t, input.Email, responseBody["data"].(map[string]interface{})["email"].(string), "Email should be the same and unique")
 }
 
 func TestRegisterUser_CreatUserSuccess(t *testing.T) {
@@ -161,9 +175,15 @@ func TestRegisterUser_CreatUserSuccess(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 	router.ServeHTTP(w, req)
 
+	var responseBody map[string]interface{}
+	body, _ := ioutil.ReadAll(w.Body)
+
+	json.Unmarshal(body, &responseBody)
+
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusCreated, w.Code, "Status code should be 201")
-	assert.Equal(t, "application/json", req.Header.Get("Content-Type"), "Content-Type should be application/json")
+	assert.Equal(t, "success", responseBody["meta"].(map[string]interface{})["status"], "Status code should be success")
+	assert.Equal(t, input.Email, responseBody["data"].(map[string]interface{})["email"].(string), "Email should be the same and unique")
 }
 
 func TestLoginUser_ValidationFailed(t *testing.T) {
@@ -191,9 +211,14 @@ func TestLoginUser_ValidationFailed(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 	router.ServeHTTP(w, req)
 
+	var responseBody map[string]interface{}
+	body, _ := ioutil.ReadAll(w.Body)
+
+	json.Unmarshal(body, &responseBody)
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusUnprocessableEntity, w.Code, "Status code should be 422")
-	assert.Equal(t, "application/json", req.Header.Get("Content-Type"), "Content-Type should be application/json")
+	assert.Equal(t, "Key: 'LoginInput.Email' Error:Field validation for 'Email' failed on the 'required' tag", responseBody["data"].(map[string]interface{})["errors"].([]interface{})[0].(string), "Email should be not filled")
+	assert.Equal(t, "error", responseBody["meta"].(map[string]interface{})["status"], "Status code should be error")
 }
 
 func TestLoginUser_ValidationAndLoginSuccess(t *testing.T) {
@@ -207,8 +232,8 @@ func TestLoginUser_ValidationAndLoginSuccess(t *testing.T) {
 	router.POST("/api/v1/login", userHandler.LoginUser)
 	w := httptest.NewRecorder()
 	input := user.LoginInput{
-		Email:    "johns@mail.com",
-		Password: "123456789",
+		Email:    "john@mail.com",
+		Password: "12345678",
 	}
 	var buf bytes.Buffer
 
@@ -220,10 +245,15 @@ func TestLoginUser_ValidationAndLoginSuccess(t *testing.T) {
 
 	req.Header.Set("Content-Type", "application/json")
 	router.ServeHTTP(w, req)
+	var responseBody map[string]interface{}
+	body, _ := ioutil.ReadAll(w.Body)
+
+	json.Unmarshal(body, &responseBody)
 
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusOK, w.Code, "Status code should be 200")
-	assert.Equal(t, "application/json", req.Header.Get("Content-Type"), "Content-Type should be application/json")
+	assert.Equal(t, input.Email, responseBody["data"].(map[string]interface{})["email"].(string), "Email should be same to the input")
+	assert.Equal(t, "success", responseBody["meta"].(map[string]interface{})["status"], "Status code should be success")
 }
 
 func TestUpdateUser_InvalidToken(t *testing.T) {
@@ -234,7 +264,7 @@ func TestUpdateUser_InvalidToken(t *testing.T) {
 	authService := user.NewService(authRepository)
 	userHandler := handler.NewUserHandler(authService)
 	var inputID string
-	inputID = "2"
+	inputID = "1"
 
 	invalidToken := "token"
 
@@ -263,10 +293,15 @@ func TestUpdateUser_InvalidToken(t *testing.T) {
 	req.Header.Set("Authorization", invalidToken)
 
 	router.ServeHTTP(w, req)
+	var responseBody map[string]interface{}
+	body, _ := ioutil.ReadAll(w.Body)
+
+	json.Unmarshal(body, &responseBody)
 
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusUnauthorized, w.Code, "Status code should be 401")
-	assert.Equal(t, "application/json", req.Header.Get("Content-Type"), "Content-Type should be application/json")
+	assert.Equal(t, "Invalid Authorization Format", responseBody["meta"].(map[string]interface{})["message"].(string), "Message should be Invalid Authorization Format")
+	assert.Equal(t, "error", responseBody["meta"].(map[string]interface{})["status"], "Status code should be error")
 }
 func TestUpdateUser_Success(t *testing.T) {
 	router := getRouter()
@@ -276,7 +311,7 @@ func TestUpdateUser_Success(t *testing.T) {
 	authService := user.NewService(authRepository)
 	userHandler := handler.NewUserHandler(authService)
 	var inputID string
-	inputID = "2"
+	inputID = "1"
 
 	jwtWrapper := auth.JwtWrapper{
 		SecretKey:       "survosecret",
@@ -284,8 +319,8 @@ func TestUpdateUser_Success(t *testing.T) {
 		ExpirationHours: 2,
 	}
 
-	generatedToken, _:= jwtWrapper.GenerateToken(2, "johns@mail.com")
-	validToken := "Bearer "+generatedToken
+	generatedToken, _ := jwtWrapper.GenerateToken(1, "john@mail.com")
+	validToken := "Bearer " + generatedToken
 
 	router.Use(auth.AuthMiddleware(authService))
 
@@ -295,8 +330,8 @@ func TestUpdateUser_Success(t *testing.T) {
 		FullName:             "New John",
 		Email:                "example@mail.com",
 		Username:             "example",
-		Password:             "12345678",
-		PasswordConfirmation: "12345678",
+		Password:             "123456789",
+		PasswordConfirmation: "123456789",
 		Phone:                "081234567882",
 		Birthday:             "06-01-2001",
 	}
@@ -312,10 +347,15 @@ func TestUpdateUser_Success(t *testing.T) {
 	req.Header.Set("Authorization", validToken)
 
 	router.ServeHTTP(w, req)
+	var responseBody map[string]interface{}
+	body, _ := ioutil.ReadAll(w.Body)
+
+	json.Unmarshal(body, &responseBody)
 
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusOK, w.Code, "Status code should be 200")
-	assert.Equal(t, "application/json", req.Header.Get("Content-Type"), "Content-Type should be application/json")
+	assert.Equal(t, newData.FullName, responseBody["data"].(map[string]interface{})["fullName"].(string), "FullName should be the same as newData")
+	assert.Equal(t, "success", responseBody["meta"].(map[string]interface{})["status"], "Status code should be Success")
 }
 
 func TestGenerateToken(t *testing.T) {
@@ -337,7 +377,7 @@ func TestValidateJwtToken(t *testing.T) {
 		SecretKey: "survosecret",
 		Issuer:    "AuthService",
 	}
-	generateToken,_ := jwtWrapper.GenerateToken(1,"john@mail.com")
+	generateToken, _ := jwtWrapper.GenerateToken(1, "john@mail.com")
 	signedToken := generateToken
 
 	claims, err := jwtWrapper.ValidateToken(signedToken)
@@ -363,8 +403,8 @@ func TestGetUserById_FailedNotAuthorization(t *testing.T) {
 		ExpirationHours: 2,
 	}
 
-	generatedToken, _:= jwtWrapper.GenerateToken(2, "johns@mail.com")
-	validToken := "Bearer "+generatedToken
+	generatedToken, _ := jwtWrapper.GenerateToken(2, "johns@mail.com")
+	validToken := "Bearer " + generatedToken
 
 	router.Use(auth.AuthMiddleware(authService))
 
@@ -376,10 +416,14 @@ func TestGetUserById_FailedNotAuthorization(t *testing.T) {
 	req.Header.Set("Authorization", validToken)
 
 	router.ServeHTTP(w, req)
+	var responseBody map[string]interface{}
+	body, _ := ioutil.ReadAll(w.Body)
+
+	json.Unmarshal(body, &responseBody)
 
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusUnauthorized, w.Code, "Status code should be 401")
-	assert.Equal(t, "application/json", req.Header.Get("Content-Type"), "Content-Type should be application/json")
+	assert.Equal(t, "error", responseBody["meta"].(map[string]interface{})["status"], "Status code should be error")
 
 }
 func TestGetUserById_Success(t *testing.T) {
@@ -390,7 +434,7 @@ func TestGetUserById_Success(t *testing.T) {
 	authService := user.NewService(authRepository)
 	userHandler := handler.NewUserHandler(authService)
 	var inputID string
-	inputID = "2"
+	inputID = "1"
 
 	jwtWrapper := auth.JwtWrapper{
 		SecretKey:       "survosecret",
@@ -398,8 +442,8 @@ func TestGetUserById_Success(t *testing.T) {
 		ExpirationHours: 2,
 	}
 
-	generatedToken, _:= jwtWrapper.GenerateToken(2, "johns@mail.com")
-	validToken := "Bearer "+generatedToken
+	generatedToken, _ := jwtWrapper.GenerateToken(1, "john@mail.com")
+	validToken := "Bearer " + generatedToken
 
 	router.Use(auth.AuthMiddleware(authService))
 
@@ -411,11 +455,15 @@ func TestGetUserById_Success(t *testing.T) {
 	req.Header.Set("Authorization", validToken)
 
 	router.ServeHTTP(w, req)
+	var responseBody map[string]interface{}
+	body, _ := ioutil.ReadAll(w.Body)
+
+	json.Unmarshal(body, &responseBody)
 
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusOK, w.Code, "Status code should be 200")
-	assert.Equal(t, "application/json", req.Header.Get("Content-Type"), "Content-Type should be application/json")
-
+	assert.Equal(t, "New John", responseBody["data"].(map[string]interface{})["fullName"].(string), "FullName should be the same as newData")
+	assert.Equal(t, "success", responseBody["meta"].(map[string]interface{})["status"], "Status code should be Success")
 
 }
 
@@ -505,8 +553,8 @@ func TestTokenisValid(t *testing.T) {
 		ExpirationHours: 2,
 	}
 
-	generatedToken, _:= jwtWrapper.GenerateToken(1, "john@mail.com")
-	validToken := "Bearer "+generatedToken
+	generatedToken, _ := jwtWrapper.GenerateToken(1, "john@mail.com")
+	validToken := "Bearer " + generatedToken
 	router := gin.Default()
 
 	db, _ := GetConnection()
