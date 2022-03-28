@@ -22,6 +22,10 @@ func MigrateTableSurvey(db *gorm.DB) {
 }
 
 func TestMigrateSurvey(t *testing.T) {
-	db ,_ := GetConnection()
+	db, _ := GetConnection()
 	MigrateTableSurvey(db)
+}
+
+func TestCreateSurvey(t *testing.T) {
+
 }

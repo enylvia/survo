@@ -11,7 +11,7 @@ type Survey struct {
 	Point      int      `gorm:"not null"`
 	Question   Question `gorm:"ForeignKey:SurveyId"`
 	Answer     Answer   `gorm:"ForeignKey:SurveyId"`
-	Softdelete time.Time
+	Count 	 int	`gorm:"not_null"`
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
 }
