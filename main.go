@@ -7,6 +7,7 @@ import (
 	"log"
 	"survorest/auth"
 	"survorest/handler"
+	"survorest/survey"
 	"survorest/user"
 )
 
@@ -19,8 +20,12 @@ func main() {
 
 	}
 	userRepository := user.NewRepository(db)
+	surveyRepository := survey.NewRepository(db)
 	userService := user.NewService(userRepository)
+	surveyService := survey.NewService(surveyRepository)
 	userHandler := handler.NewUserHandler(userService)
+	surveyHandler := handler.NewSurveyHandler(surveyService)
+
 	googleHandler := auth.GoogleService(userRepository)
 	router := gin.Default()
 	//router.Use(cors.Default())
@@ -38,6 +43,7 @@ func main() {
 		api.PUT("/update/:id", userHandler.UpdateProfile)
 		api.PUT("/upload/:id", userHandler.UploadAvatar)
 		api.GET("/profile/:id", userHandler.GetProfile)
+		api.POST("/createsurvey", surveyHandler.CreateSurvey)
 
 	router.Run(":8080")
 }

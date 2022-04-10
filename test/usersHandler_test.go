@@ -73,7 +73,6 @@ func TestRegisterUser_ValidationForm(t *testing.T) {
 	authService := user.NewService(authRepository)
 	userHandler := handler.NewUserHandler(authService)
 
-	MigrateTable(db)
 	router.POST("/api/v1/register", userHandler.RegisterUser)
 	w := httptest.NewRecorder()
 	input := user.RegisterInput{
@@ -574,7 +573,7 @@ func TestTokenisValid(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, 200, w.Code)
 }
-func TestTruncateTable(t *testing.T) {
-	db, _ := GetConnection()
-	TruncateTable(db)
-}
+//func TestTruncateTable(t *testing.T) {
+//	db, _ := GetConnection()
+//	TruncateTable(db)
+//}

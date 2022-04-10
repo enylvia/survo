@@ -7,6 +7,7 @@ type Survey struct {
 	UserId     int64    `gorm:"column:user_id; not null"`
 	Title      string   `gorm:"type:varchar(100); not null"`
 	Summary    string   `gorm:"type:varchar(255); not null"`
+	Category	string	`gorm:"type:varchar(100); not null"`
 	Target     int      `gorm:"not null"`
 	Point      int      `gorm:"not null"`
 	Question   Question `gorm:"ForeignKey:SurveyId"`
@@ -19,6 +20,7 @@ type Question struct {
 	Id           int64  `gorm:"primaryKey; not_null"`
 	SurveyId     int64  `gorm:"column:survey_id; not null"`
 	UserId       int64  `gorm:"column:user_id; not null"`
+	SurveyQuestion string `gorm:"type:varchar(255); not null"`
 	QuestionType string `gorm:"type:varchar(100); not null"`
 	OptionName   string `gorm:"type:varchar(100);"`
 	Answer       Answer `gorm:"ForeignKey:QuestionId"`
