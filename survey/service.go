@@ -2,7 +2,8 @@ package survey
 
 type Service interface {
 	CreateSurveyForm(survey CreateSurveyInput) (Survey, error)
-	GetSurvey(id int) (Survey, error)
+	GetSurveyDetail(id int) (Survey, error)
+	GetSurveyList(id int) ([]Survey, error)
 	AnswerQuestion(input AnswerInput) (Survey, error)
 }
 type service struct {
@@ -41,9 +42,23 @@ func (s *service) CreateSurveyForm(input CreateSurveyInput) (Survey, error) {
 	return survey, nil
 }
 
-func (s *service) GetSurvey(id int) (Survey, error) {
+func (s *service) GetSurveyDetail(id int) (Survey, error) {
 	//TODO implement me
 	panic("implement me")
+}
+func (s *service) GetSurveyList(id int) ([]Survey, error) {
+	if id != 0 {
+		survey , err := s.repository.GetSurveyByIDUser(id)
+		if err != nil {
+			return survey, err
+		}
+		return survey, nil
+	}
+	survey, err := s.repository.GetSurvey()
+	if err != nil {
+		return survey, err
+	}
+	return survey, nil
 }
 
 func (s *service) AnswerQuestion(input AnswerInput) (Survey, error) {

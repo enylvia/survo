@@ -30,3 +30,13 @@ func FormatSurvey(survey Survey) SurveyFormatter {
 	}
 	return formatter
 }
+
+func FormatSurveyList(surveys []Survey) []SurveyFormatter {
+	surveysFormatter := []SurveyFormatter{}
+
+	for _, survey := range surveys {
+		surveyformatter := FormatSurvey(survey)
+		surveysFormatter = append(surveysFormatter, surveyformatter)
+	}
+	return surveysFormatter
+}

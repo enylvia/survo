@@ -3,7 +3,8 @@ package survey
 import "gorm.io/gorm"
 
 type Repository interface {
-	GetSurvey(id string) (Survey, error)
+	GetSurvey() ([]Survey, error)
+	GetSurveyByIDUser(id int) ([]Survey, error)
 	CreateSurvey(survey Survey) (Survey, error)
 	CreateQuestion(question Question) (Question, error)
 	CreateAnswer(answer []Answer) ([]Answer, error)
@@ -19,9 +20,23 @@ func NewRepository(db *gorm.DB) *repository {
 
 
 
-func (r *repository) GetSurvey(id string) (Survey, error) {
+func (r *repository) GetSurvey() ([]Survey, error) {
 	//TODO implement me
-	panic("implement me")
+	var surveys []Survey
+	err := r.db.Preload("Question").Find(&surveys).Error
+	if err != nil {
+		return surveys, err
+	}
+	return surveys, nil
+}
+
+func (r *repository) GetSurveyByIDUser(id int) ([]Survey, error) {
+	var surveys []Survey
+	err := r.db.Where("user_id = ?", id).Find(&surveys).Error
+	if err != nil {
+		return surveys, err
+	}
+	return surveys, nil
 }
 
 func (r *repository) CreateSurvey(survey Survey) (Survey, error) {
