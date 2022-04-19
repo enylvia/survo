@@ -10,7 +10,7 @@ type Survey struct {
 	Category	string	`gorm:"type:varchar(100); not null"`
 	Target     int      `gorm:"not null"`
 	Point      int      `gorm:"not null"`
-	Questions   Question `gorm:"ForeignKey:SurveyId"`
+	Questions   []Question `gorm:"ForeignKey:SurveyId"`
 	Answer     Answer   `gorm:"ForeignKey:SurveyId"`
 	Count 	 int	`gorm:"not_null"`
 	CreatedAt  time.Time
@@ -23,7 +23,7 @@ type Question struct {
 	SurveyQuestion string `gorm:"type:varchar(255); not null"`
 	QuestionType string `gorm:"type:varchar(100); not null"`
 	OptionName   string `gorm:"type:varchar(100);"`
-	Answer       Answer `gorm:"ForeignKey:QuestionId"`
+	Answer       []Answer `gorm:"ForeignKey:QuestionId"`
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 }
