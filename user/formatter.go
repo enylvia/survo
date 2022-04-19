@@ -8,6 +8,13 @@ type UserFormatter struct {
 	Token      string `json:"token"`
 	Attribute AttributFormatter `json:"attribute"`
 }
+type UserFormatterLogin struct {
+	ID         int    `json:"id"`
+	FullName   string `json:"fullName"`
+	Occupation string `json:"occupation"`
+	Email      string `json:"email"`
+	Token      string `json:"token"`
+}
 type UserFormatterRegister struct {
 	ID         int    `json:"id"`
 	FullName   string `json:"fullName"`
@@ -33,8 +40,8 @@ type AttributFormatter struct {
 	Balance 	int 	`json:"balance"`
 }
 
-func FormatUser(user User, token string) UserFormatter {
-	formatter := UserFormatter{
+func FormatUser(user User, token string) UserFormatterLogin {
+	formatter := UserFormatterLogin{
 		ID:         int(user.Id),
 		FullName:   user.FullName,
 		Occupation: user.Occupation,
@@ -54,15 +61,15 @@ func FormatUserRegister(user User) UserFormatterRegister {
 }
 
 func FormatDetailUser(user User) UserDetail {
-	formatter := UserDetail{
-		ID:       int(user.Id),
-		FullName: user.FullName,
-		Email:    user.Email,
-		Username: user.Username,
-		Image:    user.Image,
-		Phone:    user.Phone,
-		Birthday: user.Birthday,
-	}
+	formatter := UserDetail{}
+	formatter.ID = int(user.Id)
+	formatter.FullName= user.FullName
+	formatter.Email=    user.Email
+	formatter.Username= user.Username
+	formatter.Image=    user.Image
+	formatter.Phone=    user.Phone
+	formatter.Birthday= user.Birthday
+
 	attrib := user.Attribut
 	attributFormatter := AttributFormatter{}
 	attributFormatter.UserId = uint(user.Id)
@@ -71,6 +78,7 @@ func FormatDetailUser(user User) UserDetail {
 	attributFormatter.ParticipateSurvey = attrib.ParticipateSurvey
 	attributFormatter.IsPremium = attrib.IsPremium
 	attributFormatter.Balance = attrib.Balance
+
 	formatter.Attribute = attributFormatter
 
 	return formatter

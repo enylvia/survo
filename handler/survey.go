@@ -56,3 +56,25 @@ func (h *surveyHandler) SurveyList(c *gin.Context) {
 	response := helper.ApiResponse("Successfully get list survey", http.StatusOK, "success", formatter)
 	c.JSON(http.StatusOK, response)
 }
+
+func (h *surveyHandler) GetSurveyDetail(c *gin.Context){
+	var surveyID survey.SurveyDetailID
+
+	err := c.ShouldBindUri(&surveyID)
+	if err != nil {
+		errorMessage := gin.H{"error": err.Error()}
+		response := helper.ApiResponse("Invalid Input", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+	surveyDetail, err := h.surveyService.GetSurveyDetail(surveyID.ID)
+	if err != nil {
+		errorMessage := gin.H{"error": err.Error()}
+		response := helper.ApiResponse("Survey not found", http.StatusNotFound, "error", errorMessage)
+		c.JSON(http.StatusNotFound, response)
+		return
+	}
+	formatter := survey.FormatSurveyDetail(surveyDetail)
+	response := helper.ApiResponse("Successfully get survey detail", http.StatusOK, "success", formatter)
+	c.JSON(http.StatusOK, response)
+}

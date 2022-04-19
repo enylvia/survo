@@ -19,3 +19,7 @@ type QuestionInput struct {
 
 type AnswerInput struct {
 }
+
+type SurveyDetailID struct {
+	ID int `uri:"id" binding:"required"`
+}

@@ -39,6 +39,7 @@ func main() {
 	api.GET("/callback", googleHandler.HandleCallback)
 	api.GET("/surveylist", surveyHandler.SurveyList)
 	api.GET("/surveylist/:id", surveyHandler.SurveyList)
+	api.GET("/surveydetail/:id", surveyHandler.GetSurveyDetail)
 	//Change grouping
 	api.Use(auth.AuthMiddleware(userService)) // protect all routes
 		api.PUT("/update/:id", userHandler.UpdateProfile)

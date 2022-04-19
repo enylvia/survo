@@ -191,19 +191,19 @@ func TestCreateSurveySuccess(t *testing.T) {
 				UserId:         1,
 				SurveyQuestion: "apakah anda pernah mengikuti kursus?",
 				QuestionType:   "Checkbox",
-				OptionName:     "Option 1",
+				OptionName:     "Option 1,Option 2,Option 3",
 			},
 			{
 				UserId:         1,
 				SurveyQuestion: "dimana anda mengikuti kursus tersebut?",
 				QuestionType:   "Checkbox",
-				OptionName:     "Option 1",
+				OptionName:     "Option 1,Option 2,Option 3",
 			},
 			{
 				UserId:         1,
 				SurveyQuestion: "apakah anda ingin mengikuti kursus?",
 				QuestionType:   "Checkbox",
-				OptionName:     "Option 2",
+				OptionName:     "Option 1,Option 2,Option 3",
 			},
 		},
 	}
@@ -283,5 +283,57 @@ func TestGetSurveyListByIDUser(t *testing.T) {
 
 	assert.Equal(t, "success", responseBody["meta"].(map[string]interface{})["status"], "Status code should be success")
 	assert.Equal(t, "Successfully get list survey", responseBody["meta"].(map[string]interface{})["message"], "Message code should be Successfully get list survey")
+
+}
+func TestGetSurveyDetail(t *testing.T) {
+	router := getRouter()
+	db, _ := GetConnection()
+	surveyRepository := survey.NewRepository(db)
+	surveyService := survey.NewService(surveyRepository)
+	surveyHandler := handler.NewSurveyHandler(surveyService)
+	router.GET("/api/v1/surveydetail/:id", surveyHandler.GetSurveyDetail)
+	w := httptest.NewRecorder()
+	userID := strconv.Itoa(1)
+
+	req, err := http.NewRequest("GET", "http://localhost:8080/api/v1/surveydetail/"+userID, nil)
+	req.Header.Set("Content-Type", "application/json")
+	router.ServeHTTP(w, req)
+
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var responseBody map[string]interface{}
+	body, _ := ioutil.ReadAll(w.Body)
+
+	json.Unmarshal(body, &responseBody)
+
+	assert.Equal(t, "success", responseBody["meta"].(map[string]interface{})["status"], "Status code should be success")
+	assert.Equal(t, "Successfully get survey detail", responseBody["meta"].(map[string]interface{})["message"], "Message code should be Successfully get list survey")
+
+}
+func TestGetSurveyDetailInvalidInput(t *testing.T) {
+	router := getRouter()
+	db, _ := GetConnection()
+	surveyRepository := survey.NewRepository(db)
+	surveyService := survey.NewService(surveyRepository)
+	surveyHandler := handler.NewSurveyHandler(surveyService)
+	router.GET("/api/v1/surveydetail/:id", surveyHandler.GetSurveyDetail)
+	w := httptest.NewRecorder()
+	userID := "survey_1"
+
+	req, err := http.NewRequest("GET", "http://localhost:8080/api/v1/surveydetail/"+userID, nil)
+	req.Header.Set("Content-Type", "application/json")
+	router.ServeHTTP(w, req)
+
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusUnprocessableEntity, w.Code)
+
+	var responseBody map[string]interface{}
+	body, _ := ioutil.ReadAll(w.Body)
+
+	json.Unmarshal(body, &responseBody)
+
+	assert.Equal(t, "error", responseBody["meta"].(map[string]interface{})["status"], "Status code should be error")
+	assert.Equal(t, "Invalid Input", responseBody["meta"].(map[string]interface{})["message"], "Message code should be Invalid Input")
 
 }

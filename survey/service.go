@@ -1,5 +1,7 @@
 package survey
 
+import "strconv"
+
 type Service interface {
 	CreateSurveyForm(survey CreateSurveyInput) (Survey, error)
 	GetSurveyDetail(id int) (Survey, error)
@@ -43,11 +45,14 @@ func (s *service) CreateSurveyForm(input CreateSurveyInput) (Survey, error) {
 }
 
 func (s *service) GetSurveyDetail(id int) (Survey, error) {
-	//TODO implement me
-	panic("implement me")
+	survey, err := s.repository.GetSurveyDetail(id)
+	if err != nil {
+		return survey, err
+	}
+	return survey, nil
 }
 func (s *service) GetSurveyList(id int) ([]Survey, error) {
-	if id != 0 {
+	if strconv.Itoa(id) != ""  {
 		survey , err := s.repository.GetSurveyByIDUser(id)
 		if err != nil {
 			return survey, err
