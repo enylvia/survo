@@ -1,6 +1,9 @@
 package survey
 
-import "strconv"
+import (
+	"errors"
+	"strconv"
+)
 
 type Service interface {
 	CreateSurveyForm(survey CreateSurveyInput) (Survey, error)
@@ -20,7 +23,7 @@ func NewService(repository Repository) *service {
 
 func (s *service) CreateSurveyForm(input CreateSurveyInput) (Survey, error) {
 	var survey Survey
-	survey.UserId = int64(input.UserId)
+	survey.UserId = input.UserId
 	survey.Title = input.SurveyTitle
 	survey.Summary = input.SurveyDescription
 	survey.Category = input.SurveyCategory
@@ -46,6 +49,9 @@ func (s *service) CreateSurveyForm(input CreateSurveyInput) (Survey, error) {
 
 func (s *service) GetSurveyDetail(id int) (Survey, error) {
 	survey, err := s.repository.GetSurveyDetail(id)
+	if survey.Id != uint(id) {
+		return survey , errors.New("Survey not found")
+	}
 	if err != nil {
 		return survey, err
 	}

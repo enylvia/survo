@@ -6,7 +6,7 @@ import (
 )
 
 type User struct {
-	Id         int64         `gorm:"primaryKey; not null"`
+	Id         uint         `gorm:"primaryKey; not null"`
 	FullName   string        `gorm:"type:varchar(100); not null"`
 	Email      string        `gorm:"type:varchar(100); not null;uniqueIndex"`
 	Username   string        `gorm:"type:varchar(100); not null"`
@@ -24,7 +24,7 @@ type User struct {
 }
 
 type Attribut struct {
-	Id                int64 `gorm:"primaryKey; not null, AUTO_INCREMENT"`
+	Id                uint `gorm:"primaryKey; not null, AUTO_INCREMENT"`
 	UserId            uint  `gorm:"column:user_id; not null"`
 	PostedSurvey      int   `gorm:"not null"`
 	TotalRespondent   int   `gorm:"not null"`
