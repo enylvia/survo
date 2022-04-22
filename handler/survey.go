@@ -78,3 +78,26 @@ func (h *surveyHandler) GetSurveyDetail(c *gin.Context){
 	response := helper.ApiResponse("Successfully get survey detail", http.StatusOK, "success", formatter)
 	c.JSON(http.StatusOK, response)
 }
+
+func (h *surveyHandler) AnswerQuestion (c *gin.Context){
+	var answerSurvey []survey.AnswerInput
+
+	err := c.ShouldBindJSON(&answerSurvey)
+	if err != nil {
+		errorMessage := gin.H{"error": err.Error()}
+		response := helper.ApiResponse("Invalid Input", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+	answer , err := h.surveyService.AnswerQuestion(answerSurvey)
+	if err != nil {
+		errorMessage := gin.H{"error": err.Error()}
+		response := helper.ApiResponse("Error Answer Question", http.StatusBadRequest, "error", errorMessage)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+	formatter := survey.FormatAnswer(answer)
+	response := helper.ApiResponse("Successfully answer question", http.StatusOK, "success", formatter)
+	c.JSON(http.StatusOK, response)
+
+}

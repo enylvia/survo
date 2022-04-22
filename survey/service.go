@@ -2,14 +2,13 @@ package survey
 
 import (
 	"errors"
-	"strconv"
 )
 
 type Service interface {
 	CreateSurveyForm(survey CreateSurveyInput) (Survey, error)
 	GetSurveyDetail(id int) (Survey, error)
 	GetSurveyList(id int) ([]Survey, error)
-	AnswerQuestion(input AnswerInput) (Survey, error)
+	AnswerQuestion(input []AnswerInput) (Answer, error)
 }
 type service struct {
 	repository Repository
@@ -50,7 +49,7 @@ func (s *service) CreateSurveyForm(input CreateSurveyInput) (Survey, error) {
 func (s *service) GetSurveyDetail(id int) (Survey, error) {
 	survey, err := s.repository.GetSurveyDetail(id)
 	if survey.Id != uint(id) {
-		return survey , errors.New("Survey not found")
+		return survey, errors.New("Survey not found")
 	}
 	if err != nil {
 		return survey, err
@@ -58,8 +57,8 @@ func (s *service) GetSurveyDetail(id int) (Survey, error) {
 	return survey, nil
 }
 func (s *service) GetSurveyList(id int) ([]Survey, error) {
-	if strconv.Itoa(id) != ""  {
-		survey , err := s.repository.GetSurveyByIDUser(id)
+	if id != 0 {
+		survey, err := s.repository.GetSurveyByIDUser(id)
 		if err != nil {
 			return survey, err
 		}
@@ -72,7 +71,15 @@ func (s *service) GetSurveyList(id int) ([]Survey, error) {
 	return survey, nil
 }
 
-func (s *service) AnswerQuestion(input AnswerInput) (Survey, error) {
-	//TODO implement me
-	panic("implement me")
+func (s *service) AnswerQuestion(input []AnswerInput) (Answer, error) {
+	var answer Answer
+	for _, val := range input {
+		answer.UserId = val.UserId
+		answer.SurveyId = val.SurveyId
+		answer.QuestionId = val.QuestionId
+		answer.Respond = val.Respond
+
+		s.repository.CreateAnswer(answer)
+	}
+	return answer, nil
 }

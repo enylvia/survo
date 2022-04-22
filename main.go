@@ -40,6 +40,7 @@ func main() {
 	api.GET("/surveylist", surveyHandler.SurveyList)
 	api.GET("/surveylist/:id", surveyHandler.SurveyList)
 	api.GET("/surveydetail/:id", surveyHandler.GetSurveyDetail)
+	api.POST("/answerquestion", surveyHandler.AnswerQuestion)
 	//Change grouping
 	api.Use(auth.AuthMiddleware(userService)) // protect all routes
 		api.PUT("/update/:id", userHandler.UpdateProfile)

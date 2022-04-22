@@ -892,9 +892,9 @@ func TestGetSurveyDetailNotFound(t *testing.T) {
 	surveyHandler := handler.NewSurveyHandler(surveyService)
 	router.GET("/api/v1/surveydetail/:id", surveyHandler.GetSurveyDetail)
 	w := httptest.NewRecorder()
-	userID := "4"
+	surveyID := "4"
 
-	req, err := http.NewRequest("GET", "http://localhost:8080/api/v1/surveydetail/"+userID, nil)
+	req, err := http.NewRequest("GET", "http://localhost:8080/api/v1/surveydetail/"+surveyID, nil)
 	req.Header.Set("Content-Type", "application/json")
 	router.ServeHTTP(w, req)
 
@@ -908,6 +908,63 @@ func TestGetSurveyDetailNotFound(t *testing.T) {
 
 	assert.Equal(t, "error", responseBody["meta"].(map[string]interface{})["status"], "Status code should be error")
 	assert.Equal(t, "Survey not found", responseBody["meta"].(map[string]interface{})["message"], "Message code should be Invalid Input")
+
+}
+
+func TestAnswerQuestionSuccess(t *testing.T) {
+	router := getRouter()
+	db, _ := GetConnection()
+	surveyRepository := survey.NewRepository(db)
+	surveyService := survey.NewService(surveyRepository)
+	surveyHandler := handler.NewSurveyHandler(surveyService)
+	router.POST("/api/v1/answerquestion", surveyHandler.AnswerQuestion)
+	w := httptest.NewRecorder()
+
+	answerQuestion := []survey.AnswerInput{
+		{
+			Id:         1,
+			SurveyId:   1,
+			UserId:     1,
+			QuestionId: 1,
+			Respond:    "Option 1",
+		},
+		{
+			Id:         1,
+			SurveyId:   1,
+			UserId:     1,
+			QuestionId: 2,
+			Respond:    "Option 2",
+		},
+		{
+			Id:         1,
+			SurveyId:   1,
+			UserId:     1,
+			QuestionId: 3,
+			Respond:    "Option 3",
+		},
+	}
+	var buf bytes.Buffer
+
+	err := json.NewEncoder(&buf).Encode(answerQuestion)
+
+	if err != nil {
+		t.Errorf("Error encoding json")
+	}
+
+	req, err := http.NewRequest("POST", "http://localhost:8080/api/v1/answerquestion",&buf)
+	req.Header.Set("Content-Type", "application/json")
+	router.ServeHTTP(w, req)
+
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var responseBody map[string]interface{}
+	body, _ := ioutil.ReadAll(w.Body)
+
+	json.Unmarshal(body, &responseBody)
+
+	assert.Equal(t, "success", responseBody["meta"].(map[string]interface{})["status"], "Status code should be success")
+	assert.Equal(t, "Successfully answer question", responseBody["meta"].(map[string]interface{})["message"], "Message code should be Answer Submitted")
 
 }
 //func TestTruncateTable(t *testing.T) {

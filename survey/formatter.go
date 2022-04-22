@@ -14,11 +14,18 @@ type SurveyFormatter struct {
 }
 
 type QuestionFormatter struct {
+	ID             int      `json:"id"`
 	SurveyId       int      `json:"survey_id"`
 	UserId         int      `json:"user_id"`
 	SurveyQuestion string   `json:"survey_question"`
 	QuestionType   string   `json:"question_type"`
 	OptionName     []string `json:"option_name"`
+}
+type AnswerFormatter struct {
+	SurveyId   int    `json:"survey_id"`
+	UserId     int    `json:"user_id"`
+	QuestionId int    `json:"question_id"`
+	Respond    string `json:"respond"`
 }
 
 func FormatSurvey(survey Survey) SurveyFormatter {
@@ -43,9 +50,9 @@ func FormatSurveyList(surveys []Survey) []SurveyFormatter {
 	}
 	return surveysFormatter
 }
-
-func FormatQuestion(questions Question) QuestionFormatter{
+func FormatQuestion(questions Question) QuestionFormatter {
 	questionsFormatter := QuestionFormatter{}
+	questionsFormatter.ID = int(questions.Id)
 	questionsFormatter.SurveyId = int(questions.SurveyId)
 	questionsFormatter.UserId = int(questions.UserId)
 	questionsFormatter.SurveyQuestion = questions.SurveyQuestion
@@ -74,8 +81,17 @@ func FormatSurveyDetail(survey Survey) SurveyFormatter {
 	questionFormatter := []QuestionFormatter{}
 	for _, question := range questions {
 		questionsFormatter := FormatQuestion(question)
-		questionFormatter = append(questionFormatter,questionsFormatter)
+		questionFormatter = append(questionFormatter, questionsFormatter)
 	}
 	surveyDetailFormatter.Questions = questionFormatter
 	return surveyDetailFormatter
+}
+func FormatAnswer(answers Answer) AnswerFormatter {
+	answerFormatter := AnswerFormatter{}
+	answerFormatter.SurveyId = int(answers.SurveyId)
+	answerFormatter.UserId = int(answers.UserId)
+	answerFormatter.QuestionId = int(answers.QuestionId)
+	answerFormatter.Respond = answers.Respond
+
+	return answerFormatter
 }

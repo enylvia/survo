@@ -7,7 +7,7 @@ type Repository interface {
 	GetSurveyByIDUser(id int) ([]Survey, error)
 	CreateSurvey(survey Survey) (Survey, error)
 	CreateQuestion(question Question) (Question, error)
-	CreateAnswer(answer []Answer) ([]Answer, error)
+	CreateAnswer(answer Answer) (Answer, error)
 	GetSurveyDetail(id int)(Survey, error)
 }
 
@@ -65,7 +65,10 @@ func (r *repository) GetSurveyDetail(id int)(Survey, error){
 	return surveys, nil
 }
 
-func (r *repository) CreateAnswer(answer []Answer) ([]Answer, error) {
-	//TODO implement me
-	panic("implement me")
+func (r *repository) CreateAnswer(answer Answer) (Answer, error) {
+	err := r.db.Create(&answer).Error
+	if err != nil {
+		return answer, err
+	}
+	return answer,err
 }
