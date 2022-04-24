@@ -110,7 +110,7 @@ func (h *userHandler) UpdateProfile(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 	return
 }
-func (h *userHandler) UploadAvatar (c *gin.Context){
+func (h *userHandler) UploadAvatar(c *gin.Context) {
 	var inputID user.DetailUserInput
 	currentUser := c.MustGet("claims").(user.User)
 
@@ -134,7 +134,7 @@ func (h *userHandler) UploadAvatar (c *gin.Context){
 		return
 	}
 	file, err := c.FormFile("image")
-	fileName := strings.Join(strings.Fields(file.Filename),"")
+	fileName := strings.Join(strings.Fields(file.Filename), "")
 	pathFile := fmt.Sprintf("images/%d-%s", userId, fileName)
 	err = c.SaveUploadedFile(file, pathFile)
 	if err != nil {

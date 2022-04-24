@@ -22,7 +22,7 @@ func main() {
 	userRepository := user.NewRepository(db)
 	surveyRepository := survey.NewRepository(db)
 	userService := user.NewService(userRepository)
-	surveyService := survey.NewService(surveyRepository)
+	surveyService := survey.NewService(surveyRepository,userRepository)
 	userHandler := handler.NewUserHandler(userService)
 	surveyHandler := handler.NewSurveyHandler(surveyService)
 

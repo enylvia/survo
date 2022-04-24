@@ -2,6 +2,7 @@ package survey
 
 import (
 	"errors"
+	"survorest/user"
 )
 
 type Service interface {
@@ -12,11 +13,12 @@ type Service interface {
 }
 type service struct {
 	repository Repository
+	userRepository user.Repository
 }
 
-func NewService(repository Repository) *service {
+func NewService(repository Repository, userRepository user.Repository) *service {
 	return &service{
-		repository: repository,
+		repository: repository,userRepository: userRepository,
 	}
 }
 
@@ -43,6 +45,12 @@ func (s *service) CreateSurveyForm(input CreateSurveyInput) (Survey, error) {
 
 		s.repository.CreateQuestion(questionInput)
 	}
+	updateDataUser , err := s.userRepository.FindByID(int(input.UserId))
+	if err != nil {
+		return survey, err
+	}
+	updateDataUser.Attribut.PostedSurvey = updateDataUser.Attribut.PostedSurvey + 1
+	s.userRepository.UpdateAttribut(updateDataUser.Attribut)
 	return survey, nil
 }
 

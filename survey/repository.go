@@ -1,6 +1,8 @@
 package survey
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 type Repository interface {
 	GetSurvey() ([]Survey, error)

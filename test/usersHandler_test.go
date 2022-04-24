@@ -15,6 +15,7 @@ import (
 	"strconv"
 	"survorest/auth"
 	"survorest/handler"
+	"survorest/migrations"
 	"survorest/survey"
 	"survorest/user"
 	"testing"
@@ -61,11 +62,11 @@ func MigrateTable(db *gorm.DB) {
 		return
 	}
 
-	db.Migrator().CreateTable(&user.User{})
-	db.Migrator().CreateTable(&user.Attribut{})
-	db.Migrator().CreateTable(&survey.Survey{})
-	db.Migrator().CreateTable(&survey.Question{})
-	db.Migrator().CreateTable(&survey.Answer{})
+	db.Migrator().CreateTable(&migrations.User{})
+	db.Migrator().CreateTable(&migrations.Attribut{})
+	db.Migrator().CreateTable(&migrations.Survey{})
+	db.Migrator().CreateTable(&migrations.Question{})
+	db.Migrator().CreateTable(&migrations.Answer{})
 }
 func TestMigrate(t *testing.T) {
 	db, _ := GetConnection()
@@ -587,6 +588,7 @@ func TestCreateSurveySuccess(t *testing.T) {
 	router := getRouter()
 	db, _ := GetConnection()
 	surveyRepository := survey.NewRepository(db)
+	//userRepository := user.NewRepository(db)
 	surveyService := survey.NewService(surveyRepository)
 	surveyHandler := handler.NewSurveyHandler(surveyService)
 	authRepository := user.NewRepository(db)
@@ -663,6 +665,7 @@ func TestCreateSurveyFailedAuthorized(t *testing.T) {
 	router := getRouter()
 	db, _ := GetConnection()
 	surveyRepository := survey.NewRepository(db)
+	//userRepository := user.NewRepository(db)
 	surveyService := survey.NewService(surveyRepository)
 	surveyHandler := handler.NewSurveyHandler(surveyService)
 	authRepository := user.NewRepository(db)
@@ -731,6 +734,7 @@ func TestCreateSurveyFailedForInvalidInput(t *testing.T) {
 	router := getRouter()
 	db, _ := GetConnection()
 	surveyRepository := survey.NewRepository(db)
+	//userRepository := user.NewRepository(db)
 	surveyService := survey.NewService(surveyRepository)
 	surveyHandler := handler.NewSurveyHandler(surveyService)
 	authRepository := user.NewRepository(db)
@@ -786,6 +790,7 @@ func TestGetSurveyList(t *testing.T) {
 	router := getRouter()
 	db, _ := GetConnection()
 	surveyRepository := survey.NewRepository(db)
+	//userRepository := user.NewRepository(db)
 	surveyService := survey.NewService(surveyRepository)
 	surveyHandler := handler.NewSurveyHandler(surveyService)
 	router.GET("/api/v1/surveylist", surveyHandler.SurveyList)
@@ -810,6 +815,7 @@ func TestGetSurveyListByIDUser(t *testing.T) {
 	router := getRouter()
 	db, _ := GetConnection()
 	surveyRepository := survey.NewRepository(db)
+	//userRepository := user.NewRepository(db)
 	surveyService := survey.NewService(surveyRepository)
 	surveyHandler := handler.NewSurveyHandler(surveyService)
 	router.GET("/api/v1/surveylist", surveyHandler.SurveyList)
@@ -836,6 +842,7 @@ func TestGetSurveyDetail(t *testing.T) {
 	router := getRouter()
 	db, _ := GetConnection()
 	surveyRepository := survey.NewRepository(db)
+	//userRepository := user.NewRepository(db)
 	surveyService := survey.NewService(surveyRepository)
 	surveyHandler := handler.NewSurveyHandler(surveyService)
 	router.GET("/api/v1/surveydetail/:id", surveyHandler.GetSurveyDetail)
@@ -862,6 +869,7 @@ func TestGetSurveyDetailInvalidInput(t *testing.T) {
 	router := getRouter()
 	db, _ := GetConnection()
 	surveyRepository := survey.NewRepository(db)
+	//userRepository := user.NewRepository(db)
 	surveyService := survey.NewService(surveyRepository)
 	surveyHandler := handler.NewSurveyHandler(surveyService)
 	router.GET("/api/v1/surveydetail/:id", surveyHandler.GetSurveyDetail)
@@ -888,6 +896,7 @@ func TestGetSurveyDetailNotFound(t *testing.T) {
 	router := getRouter()
 	db, _ := GetConnection()
 	surveyRepository := survey.NewRepository(db)
+	//userRepository := user.NewRepository(db)
 	surveyService := survey.NewService(surveyRepository)
 	surveyHandler := handler.NewSurveyHandler(surveyService)
 	router.GET("/api/v1/surveydetail/:id", surveyHandler.GetSurveyDetail)
@@ -915,6 +924,7 @@ func TestAnswerQuestionSuccess(t *testing.T) {
 	router := getRouter()
 	db, _ := GetConnection()
 	surveyRepository := survey.NewRepository(db)
+	//userRepository := user.NewRepository(db)
 	surveyService := survey.NewService(surveyRepository)
 	surveyHandler := handler.NewSurveyHandler(surveyService)
 	router.POST("/api/v1/answerquestion", surveyHandler.AnswerQuestion)
