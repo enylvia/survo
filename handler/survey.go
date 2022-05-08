@@ -57,7 +57,7 @@ func (h *surveyHandler) SurveyList(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-func (h *surveyHandler) GetSurveyDetail(c *gin.Context){
+func (h *surveyHandler) GetSurveyDetail(c *gin.Context) {
 	var surveyID survey.SurveyDetailID
 
 	err := c.ShouldBindUri(&surveyID)
@@ -79,7 +79,7 @@ func (h *surveyHandler) GetSurveyDetail(c *gin.Context){
 	c.JSON(http.StatusOK, response)
 }
 
-func (h *surveyHandler) AnswerQuestion (c *gin.Context){
+func (h *surveyHandler) AnswerQuestion(c *gin.Context) {
 	var answerSurvey []survey.AnswerInput
 
 	err := c.ShouldBindJSON(&answerSurvey)
@@ -89,7 +89,7 @@ func (h *surveyHandler) AnswerQuestion (c *gin.Context){
 		c.JSON(http.StatusUnprocessableEntity, response)
 		return
 	}
-	answer , err := h.surveyService.AnswerQuestion(answerSurvey)
+	answer, err := h.surveyService.AnswerQuestion(answerSurvey)
 	if err != nil {
 		errorMessage := gin.H{"error": err.Error()}
 		response := helper.ApiResponse("Error Answer Question", http.StatusBadRequest, "error", errorMessage)

@@ -12,13 +12,13 @@ type Service interface {
 	AnswerQuestion(input []AnswerInput) (Answer, error)
 }
 type service struct {
-	repository Repository
+	repository     Repository
 	userRepository user.Repository
 }
 
 func NewService(repository Repository, userRepository user.Repository) *service {
 	return &service{
-		repository: repository,userRepository: userRepository,
+		repository: repository, userRepository: userRepository,
 	}
 }
 
@@ -45,7 +45,7 @@ func (s *service) CreateSurveyForm(input CreateSurveyInput) (Survey, error) {
 
 		s.repository.CreateQuestion(questionInput)
 	}
-	updateDataUser , err := s.userRepository.FindByID(int(input.UserId))
+	updateDataUser, err := s.userRepository.FindByID(int(input.UserId))
 	if err != nil {
 		return survey, err
 	}
@@ -89,5 +89,26 @@ func (s *service) AnswerQuestion(input []AnswerInput) (Answer, error) {
 
 		s.repository.CreateAnswer(answer)
 	}
+	userID := input[0].UserId
+	findUser , err := s.userRepository.FindByID(int(userID))
+	if err != nil {
+		return answer, errors.New("User not found")
+	}
+	surveyID := input[0].SurveyId
+	getSurveyDetailFirst , err := s.repository.GetSurveyDetail(int(surveyID))
+	if err != nil {
+		return answer, errors.New("Survey not found")
+	}
+	findUser.Attribut.ParticipateSurvey = findUser.Attribut.ParticipateSurvey + 1
+	findUser.Attribut.Balance = findUser.Attribut.Balance + getSurveyDetailFirst.Point
+	s.userRepository.UpdateAttribut(findUser.Attribut)
+
+	findUserWhoCreatedSurvey, err := s.userRepository.FindByID(int(getSurveyDetailFirst.UserId))
+	if err != nil {
+		return answer, errors.New("User not found")
+	}
+	findUserWhoCreatedSurvey.Attribut.TotalRespondent = findUserWhoCreatedSurvey.Attribut.TotalRespondent + 1
+	s.userRepository.UpdateAttribut(findUserWhoCreatedSurvey.Attribut)
+
 	return answer, nil
 }

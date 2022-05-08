@@ -31,3 +31,7 @@ type DetailUserInput struct {
 type UserImageInput struct {
 	UserId int `form:"user_id" binding:"required"`
 }
+
+type UpdateAttributInput struct {
+
+}

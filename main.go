@@ -40,13 +40,13 @@ func main() {
 	api.GET("/surveylist", surveyHandler.SurveyList)
 	api.GET("/surveylist/:id", surveyHandler.SurveyList)
 	api.GET("/surveydetail/:id", surveyHandler.GetSurveyDetail)
-	api.POST("/answerquestion", surveyHandler.AnswerQuestion)
 	//Change grouping
 	api.Use(auth.AuthMiddleware(userService)) // protect all routes
 		api.PUT("/update/:id", userHandler.UpdateProfile)
 		api.PUT("/upload/:id", userHandler.UploadAvatar)
 		api.GET("/profile/:id", userHandler.GetProfile)
 		api.POST("/createsurvey", surveyHandler.CreateSurvey)
+		api.POST("/answerquestion", surveyHandler.AnswerQuestion)
 
 	router.Run(":8080")
 }
