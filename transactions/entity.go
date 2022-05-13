@@ -1,6 +1,9 @@
 package transactions
 
-import "time"
+import (
+	"survorest/user"
+	"time"
+)
 
 type Transaction struct {
 	ID     int
@@ -9,6 +12,7 @@ type Transaction struct {
 	Status string
 	Code   string
 	PaymentURL string
+	User user.User
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }

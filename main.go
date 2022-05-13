@@ -8,6 +8,7 @@ import (
 	"survorest/auth"
 	"survorest/handler"
 	"survorest/survey"
+	"survorest/transactions"
 	"survorest/user"
 )
 
@@ -21,11 +22,15 @@ func main() {
 	}
 	userRepository := user.NewRepository(db)
 	surveyRepository := survey.NewRepository(db)
+	transactionRepository := transactions.NewRepository(db)
+
 	userService := user.NewService(userRepository)
-	surveyService := survey.NewService(surveyRepository,userRepository)
+	surveyService := survey.NewService(surveyRepository, userRepository)
+	transactionService := transactions.NewService(transactionRepository)
+
 	userHandler := handler.NewUserHandler(userService)
 	surveyHandler := handler.NewSurveyHandler(surveyService)
-
+	transactionHandler := handler.NewTransactionHandler(transactionService)
 	googleHandler := auth.GoogleService(userRepository)
 	router := gin.Default()
 	//router.Use(cors.Default())
@@ -42,11 +47,14 @@ func main() {
 	api.GET("/surveydetail/:id", surveyHandler.GetSurveyDetail)
 	//Change grouping
 	api.Use(auth.AuthMiddleware(userService)) // protect all routes
-		api.PUT("/update/:id", userHandler.UpdateProfile)
-		api.PUT("/upload/:id", userHandler.UploadAvatar)
-		api.GET("/profile/:id", userHandler.GetProfile)
-		api.POST("/createsurvey", surveyHandler.CreateSurvey)
-		api.POST("/answerquestion", surveyHandler.AnswerQuestion)
+	api.GET("/admin/transaction", transactionHandler.GetAllTransaction)
+
+	api.PUT("/update/:id", userHandler.UpdateProfile)
+	api.PUT("/upload/:id", userHandler.UploadAvatar)
+	api.GET("/profile/:id", userHandler.GetProfile)
+	api.POST("/createsurvey", surveyHandler.CreateSurvey)
+	api.POST("/answerquestion", surveyHandler.AnswerQuestion)
+	api.GET("/transaction/:id", transactionHandler.GetAllTransactionByIDUser)
 
 	router.Run(":8080")
 }

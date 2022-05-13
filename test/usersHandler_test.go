@@ -17,6 +17,7 @@ import (
 	"survorest/handler"
 	"survorest/migrations"
 	"survorest/survey"
+	"survorest/transactions"
 	"survorest/user"
 	"testing"
 )
@@ -50,23 +51,26 @@ func GetConnection() (*gorm.DB, error) {
 }
 
 func MigrateTable(db *gorm.DB) {
-	if db.Migrator().HasTable("users") || db.Migrator().HasTable("attributs") || db.Migrator().HasTable("surveys") || db.Migrator().HasTable("questions") || db.Migrator().HasTable("answers") {
+	if db.Migrator().HasTable("users") || db.Migrator().HasTable("attributs") || db.Migrator().HasTable("surveys") || db.Migrator().HasTable("questions") || db.Migrator().HasTable("answers") || db.Migrator().HasTable("transactions") {
 
 		db.Migrator().DropTable("users")
 		db.Migrator().DropTable("attributs")
 		db.Migrator().DropTable("surveys")
 		db.Migrator().DropTable("questions")
 		db.Migrator().DropTable("answers")
+		db.Migrator().DropTable("transactions")
 		log.Printf("Table users dropped")
 		log.Printf("Table Survey dropped")
+		log.Printf("Table transactions dropped")
 		return
 	}
 
 	db.Migrator().CreateTable(&migrations.User{})
-	db.Migrator().CreateTable(&migrations.Attribut{})
 	db.Migrator().CreateTable(&migrations.Survey{})
 	db.Migrator().CreateTable(&migrations.Question{})
 	db.Migrator().CreateTable(&migrations.Answer{})
+	db.Migrator().CreateTable(&migrations.Attribut{})
+	db.Migrator().CreateTable(&migrations.Transaction{})
 }
 func TestMigrate(t *testing.T) {
 	db, _ := GetConnection()
@@ -1049,6 +1053,46 @@ func TestAnswerWithoutAuthorization(t *testing.T) {
 		assert.Equal(t, "Header not provided", responseBody["meta"].(map[string]interface{})["message"], "Message code should be Header not provided")
 }
 
+func TestGetAllTransactionByIDUser_InvalidInput(t *testing.T) {
+	router := getRouter()
+	db, _ := GetConnection()
+	transactionRepository := transactions.NewRepository(db)
+	authRepository := user.NewRepository(db)
+	authService := user.NewService(authRepository)
+	transactionService := transactions.NewService(transactionRepository)
+	transactionHandler := handler.NewTransactionHandler(transactionService)
+
+	jwtWrapper := auth.JwtWrapper{
+		SecretKey:       "survosecret",
+		Issuer:          "AuthService",
+		ExpirationHours: 2,
+	}
+
+	generatedToken, _ := jwtWrapper.GenerateToken(1, "usre@mail.com")
+	validToken := "Bearer " + generatedToken
+
+	router.Use(auth.AuthMiddleware(authService))
+	router.GET("/api/v1/transaction/:id", transactionHandler.GetAllTransactionByIDUser)
+	w := httptest.NewRecorder()
+	userID := "user_1"
+
+	req, err := http.NewRequest("GET", "http://localhost:8080/api/v1/transaction/"+userID, nil)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", validToken)
+	router.ServeHTTP(w, req)
+
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusUnprocessableEntity, w.Code)
+
+	var responseBody map[string]interface{}
+	body, _ := ioutil.ReadAll(w.Body)
+
+	json.Unmarshal(body, &responseBody)
+
+	assert.Equal(t, "error", responseBody["meta"].(map[string]interface{})["status"], "Status code should be error")
+	assert.Equal(t, "Invalid Input", responseBody["meta"].(map[string]interface{})["message"], "Message code should be Invalid Input")
+
+}
 //func TestTruncateTable(t *testing.T) {
 //	db, _ := GetConnection()
 //	TruncateTable(db)
