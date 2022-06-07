@@ -45,9 +45,10 @@ func main() {
 	api.GET("/surveylist", surveyHandler.SurveyList)
 	api.GET("/surveylist/:id", surveyHandler.SurveyList)
 	api.GET("/surveydetail/:id", surveyHandler.GetSurveyDetail)
+	api.GET("/surveyrespond/:id", surveyHandler.GetRespondSurvey)
 	//Change grouping
 	api.Use(auth.AuthMiddleware(userService)) // protect all routes
-	api.GET("/admin/transaction", transactionHandler.GetAllTransaction)
+	api.GET("/transactions", transactionHandler.GetAllTransaction)
 
 	api.PUT("/update/:id", userHandler.UpdateProfile)
 	api.PUT("/upload/:id", userHandler.UploadAvatar)
@@ -55,6 +56,8 @@ func main() {
 	api.POST("/createsurvey", surveyHandler.CreateSurvey)
 	api.POST("/answerquestion", surveyHandler.AnswerQuestion)
 	api.GET("/transaction/:id", transactionHandler.GetAllTransactionByIDUser)
+	api.POST("/transactionpremium", transactionHandler.CreateTransactionPremium)
+	api.POST("/transactionwithdraw",transactionHandler.CreateTransaction)
 
 	router.Run(":8080")
 }

@@ -11,6 +11,7 @@ type Repository interface {
 	CreateQuestion(question Question) (Question, error)
 	CreateAnswer(answer Answer) (Answer, error)
 	GetSurveyDetail(id int)(Survey, error)
+	GetSurveyRespond(id int)([]Answer, error)
 }
 
 type repository struct {
@@ -73,4 +74,13 @@ func (r *repository) CreateAnswer(answer Answer) (Answer, error) {
 		return answer, err
 	}
 	return answer,err
+}
+
+func (r *repository) GetSurveyRespond(id int) ([]Answer,error){
+	var respond []Answer
+	err := r.db.Where("survey_id = ?", id).Find(&respond).Error
+	if err != nil {
+		return respond, err
+	}
+	return respond, nil
 }

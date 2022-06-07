@@ -2,6 +2,7 @@ package migrations
 
 import (
 	"survorest/survey"
+	"survorest/transactions"
 	"time"
 )
 type User struct {
@@ -18,6 +19,7 @@ type User struct {
 	Survey     survey.Survey `gorm:"ForeignKey:UserId"`
 	Question     survey.Question `gorm:"ForeignKey:UserId"`
 	Answer     survey.Answer `gorm:"ForeignKey:UserId"`
+	Transaction transactions.Transaction `gorm:"ForeignKey:UserId"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }

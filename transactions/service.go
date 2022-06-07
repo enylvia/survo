@@ -7,6 +7,8 @@ type service struct {
 type Service interface {
 	GetAllTransaction() ([]Transaction, error)
 	GetDataTransactionByIDUser(input GetTransactionUserInput)([]Transaction, error)
+	CreateTransactionWithdraw(input CreateTransactionInput)(Transaction, error)
+	CreateTransactionPremium(input CreateTransactionPremium)(Transaction,error)
 }
 
 func NewService(repository Repository) *service{
@@ -27,4 +29,33 @@ func (s *service) GetDataTransactionByIDUser(input GetTransactionUserInput) ([]T
 		return transaction,err
 	}
 	return transaction,nil
+}
+
+func (s *service) CreateTransactionWithdraw(input CreateTransactionInput)(Transaction, error){
+	var transactions Transaction
+	transactions.UserId = input.UserID
+	transactions.Amount = input.Amount
+	transactions.Status = "Pending"
+	transactions.Type = "Withdraw"
+	transaction , err := s.repository.CreateTransaction(transactions)
+
+	if err != nil {
+		return transaction,err
+	}
+	return transaction, nil
+}
+
+func (s *service)CreateTransactionPremium(input CreateTransactionPremium)(Transaction,error){
+	var transactions Transaction
+	transactions.UserId = input.ID
+	transactions.Amount = 35000
+	transactions.Status = "Pending"
+	transactions.Type = "Premium"
+
+	transactions,err := s.repository.CreateTransaction(transactions)
+
+	if err != nil {
+		return transactions,err
+	}
+	return transactions,nil
 }

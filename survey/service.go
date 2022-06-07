@@ -10,6 +10,7 @@ type Service interface {
 	GetSurveyDetail(id int) (Survey, error)
 	GetSurveyList(id int) ([]Survey, error)
 	AnswerQuestion(input []AnswerInput) (Answer, error)
+	GetRespondSurvey(id int) ([]Answer, error)
 }
 type service struct {
 	repository     Repository
@@ -23,35 +24,72 @@ func NewService(repository Repository, userRepository user.Repository) *service 
 }
 
 func (s *service) CreateSurveyForm(input CreateSurveyInput) (Survey, error) {
-	var survey Survey
-	survey.UserId = input.UserId
-	survey.Title = input.SurveyTitle
-	survey.Summary = input.SurveyDescription
-	survey.Category = input.SurveyCategory
-	survey.Target = input.Target
-	survey.Point = 25
+	findUser,_ := s.userRepository.FindByID(int(input.UserId))
 
-	survey, err := s.repository.CreateSurvey(survey)
-	if err != nil {
-		return survey, err
-	}
-	var questionInput Question
-	for _, question := range input.Question {
-		questionInput.SurveyId = survey.Id
-		questionInput.UserId = input.UserId
-		questionInput.SurveyQuestion = question.SurveyQuestion
-		questionInput.QuestionType = question.QuestionType
-		questionInput.OptionName = question.OptionName
+	if findUser.Attribut.IsPremium != true && findUser.Attribut.PostedSurvey < 1 {
+		var survey Survey
+		survey.UserId = input.UserId
+		survey.Title = input.SurveyTitle
+		survey.Summary = input.SurveyDescription
+		survey.Category = input.SurveyCategory
+		survey.Target = input.Target
+		survey.Point = 25
 
-		s.repository.CreateQuestion(questionInput)
+		survey, err := s.repository.CreateSurvey(survey)
+		if err != nil {
+			return survey, err
+		}
+		var questionInput Question
+		for _, question := range input.Question {
+			questionInput.SurveyId = survey.Id
+			questionInput.UserId = input.UserId
+			questionInput.SurveyQuestion = question.SurveyQuestion
+			questionInput.QuestionType = question.QuestionType
+			questionInput.OptionName = question.OptionName
+
+			s.repository.CreateQuestion(questionInput)
+		}
+		updateDataUser, err := s.userRepository.FindByID(int(input.UserId))
+		if err != nil {
+			return survey, err
+		}
+		updateDataUser.Attribut.PostedSurvey = updateDataUser.Attribut.PostedSurvey + 1
+		s.userRepository.UpdateAttribut(updateDataUser.Attribut)
+		return survey, nil
+	} else if findUser.Attribut.IsPremium == true {
+		var survey Survey
+		survey.UserId = input.UserId
+		survey.Title = input.SurveyTitle
+		survey.Summary = input.SurveyDescription
+		survey.Category = input.SurveyCategory
+		survey.Target = input.Target
+		survey.Point = 25
+
+		survey, err := s.repository.CreateSurvey(survey)
+		if err != nil {
+			return survey, err
+		}
+		var questionInput Question
+		for _, question := range input.Question {
+			questionInput.SurveyId = survey.Id
+			questionInput.UserId = input.UserId
+			questionInput.SurveyQuestion = question.SurveyQuestion
+			questionInput.QuestionType = question.QuestionType
+			questionInput.OptionName = question.OptionName
+
+			s.repository.CreateQuestion(questionInput)
+		}
+		updateDataUser, err := s.userRepository.FindByID(int(input.UserId))
+		if err != nil {
+			return survey, err
+		}
+		updateDataUser.Attribut.PostedSurvey = updateDataUser.Attribut.PostedSurvey + 1
+		s.userRepository.UpdateAttribut(updateDataUser.Attribut)
+		return survey, nil
+	}else{
+		var survey Survey
+		return survey, errors.New("Post Limit")
 	}
-	updateDataUser, err := s.userRepository.FindByID(int(input.UserId))
-	if err != nil {
-		return survey, err
-	}
-	updateDataUser.Attribut.PostedSurvey = updateDataUser.Attribut.PostedSurvey + 1
-	s.userRepository.UpdateAttribut(updateDataUser.Attribut)
-	return survey, nil
 }
 
 func (s *service) GetSurveyDetail(id int) (Survey, error) {
@@ -111,4 +149,13 @@ func (s *service) AnswerQuestion(input []AnswerInput) (Answer, error) {
 	s.userRepository.UpdateAttribut(findUserWhoCreatedSurvey.Attribut)
 
 	return answer, nil
+}
+
+func (s *service)GetRespondSurvey(id int) ([]Answer, error){
+	respond ,err := s.repository.GetSurveyRespond(id)
+
+	if err != nil {
+		return respond , err
+	}
+	return respond,nil
 }

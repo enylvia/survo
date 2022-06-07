@@ -11,6 +11,7 @@ type repository struct {
 type Repository interface {
 	GetTransaction() ([]Transaction, error)
 	GetDataTransactionbyIDUser(id int) ([]Transaction, error)
+	CreateTransaction(transaction Transaction) (Transaction,error)
 }
 
 func NewRepository(db *gorm.DB) *repository {
@@ -36,4 +37,12 @@ func (r *repository) GetDataTransactionbyIDUser(id int) ([]Transaction, error) {
 		return transaction, err
 	}
 	return transaction, nil
+}
+
+func (r *repository)CreateTransaction (transaction Transaction)(Transaction, error){
+	err := r.db.Create(&transaction).Error
+	if err != nil {
+		return transaction, err
+	}
+	return transaction,nil
 }

@@ -7,11 +7,10 @@ import (
 
 type Transaction struct {
 	ID     int
-	UserID int
+	UserId int
 	Amount int
 	Status string
-	Code   string
-	PaymentURL string
+	Type string
 	User user.User
 	CreatedAt time.Time
 	UpdatedAt time.Time

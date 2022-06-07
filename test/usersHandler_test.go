@@ -593,7 +593,7 @@ func TestCreateSurveySuccess(t *testing.T) {
 	db, _ := GetConnection()
 	surveyRepository := survey.NewRepository(db)
 	userRepository := user.NewRepository(db)
-	surveyService := survey.NewService(surveyRepository,userRepository)
+	surveyService := survey.NewService(surveyRepository, userRepository)
 	surveyHandler := handler.NewSurveyHandler(surveyService)
 	authRepository := user.NewRepository(db)
 	authService := user.NewService(authRepository)
@@ -670,7 +670,7 @@ func TestCreateSurveyFailedAuthorized(t *testing.T) {
 	db, _ := GetConnection()
 	surveyRepository := survey.NewRepository(db)
 	userRepository := user.NewRepository(db)
-	surveyService := survey.NewService(surveyRepository,userRepository)
+	surveyService := survey.NewService(surveyRepository, userRepository)
 	surveyHandler := handler.NewSurveyHandler(surveyService)
 	authRepository := user.NewRepository(db)
 	authService := user.NewService(authRepository)
@@ -739,7 +739,7 @@ func TestCreateSurveyFailedForInvalidInput(t *testing.T) {
 	db, _ := GetConnection()
 	surveyRepository := survey.NewRepository(db)
 	userRepository := user.NewRepository(db)
-	surveyService := survey.NewService(surveyRepository,userRepository)
+	surveyService := survey.NewService(surveyRepository, userRepository)
 	surveyHandler := handler.NewSurveyHandler(surveyService)
 	authRepository := user.NewRepository(db)
 	authService := user.NewService(authRepository)
@@ -795,7 +795,7 @@ func TestGetSurveyList(t *testing.T) {
 	db, _ := GetConnection()
 	surveyRepository := survey.NewRepository(db)
 	userRepository := user.NewRepository(db)
-	surveyService := survey.NewService(surveyRepository,userRepository)
+	surveyService := survey.NewService(surveyRepository, userRepository)
 	surveyHandler := handler.NewSurveyHandler(surveyService)
 	router.GET("/api/v1/surveylist", surveyHandler.SurveyList)
 	w := httptest.NewRecorder()
@@ -820,7 +820,7 @@ func TestGetSurveyListByIDUser(t *testing.T) {
 	db, _ := GetConnection()
 	surveyRepository := survey.NewRepository(db)
 	userRepository := user.NewRepository(db)
-	surveyService := survey.NewService(surveyRepository,userRepository)
+	surveyService := survey.NewService(surveyRepository, userRepository)
 	surveyHandler := handler.NewSurveyHandler(surveyService)
 	router.GET("/api/v1/surveylist", surveyHandler.SurveyList)
 	w := httptest.NewRecorder()
@@ -847,7 +847,7 @@ func TestGetSurveyDetail(t *testing.T) {
 	db, _ := GetConnection()
 	surveyRepository := survey.NewRepository(db)
 	userRepository := user.NewRepository(db)
-	surveyService := survey.NewService(surveyRepository,userRepository)
+	surveyService := survey.NewService(surveyRepository, userRepository)
 	surveyHandler := handler.NewSurveyHandler(surveyService)
 	router.GET("/api/v1/surveydetail/:id", surveyHandler.GetSurveyDetail)
 	w := httptest.NewRecorder()
@@ -874,7 +874,7 @@ func TestGetSurveyDetailInvalidInput(t *testing.T) {
 	db, _ := GetConnection()
 	surveyRepository := survey.NewRepository(db)
 	userRepository := user.NewRepository(db)
-	surveyService := survey.NewService(surveyRepository,userRepository)
+	surveyService := survey.NewService(surveyRepository, userRepository)
 	surveyHandler := handler.NewSurveyHandler(surveyService)
 	router.GET("/api/v1/surveydetail/:id", surveyHandler.GetSurveyDetail)
 	w := httptest.NewRecorder()
@@ -901,7 +901,7 @@ func TestGetSurveyDetailNotFound(t *testing.T) {
 	db, _ := GetConnection()
 	surveyRepository := survey.NewRepository(db)
 	userRepository := user.NewRepository(db)
-	surveyService := survey.NewService(surveyRepository,userRepository)
+	surveyService := survey.NewService(surveyRepository, userRepository)
 	surveyHandler := handler.NewSurveyHandler(surveyService)
 	router.GET("/api/v1/surveydetail/:id", surveyHandler.GetSurveyDetail)
 	w := httptest.NewRecorder()
@@ -929,7 +929,7 @@ func TestAnswerQuestionSuccess(t *testing.T) {
 	db, _ := GetConnection()
 	surveyRepository := survey.NewRepository(db)
 	userRepository := user.NewRepository(db)
-	surveyService := survey.NewService(surveyRepository,userRepository)
+	surveyService := survey.NewService(surveyRepository, userRepository)
 	surveyHandler := handler.NewSurveyHandler(surveyService)
 
 	jwtWrapper := auth.JwtWrapper{
@@ -975,7 +975,7 @@ func TestAnswerQuestionSuccess(t *testing.T) {
 		t.Errorf("Error encoding json")
 	}
 
-	req, err := http.NewRequest("POST", "http://localhost:8080/api/v1/answerquestion",&buf)
+	req, err := http.NewRequest("POST", "http://localhost:8080/api/v1/answerquestion", &buf)
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", validToken)
 	router.ServeHTTP(w, req)
@@ -994,63 +994,63 @@ func TestAnswerQuestionSuccess(t *testing.T) {
 }
 
 func TestAnswerWithoutAuthorization(t *testing.T) {
-		router := getRouter()
-		db, _ := GetConnection()
-		surveyRepository := survey.NewRepository(db)
-		userRepository := user.NewRepository(db)
-		surveyService := survey.NewService(surveyRepository,userRepository)
-		surveyHandler := handler.NewSurveyHandler(surveyService)
-		authRepository := user.NewRepository(db)
-		authService := user.NewService(authRepository)
-		router.Use(auth.AuthMiddleware(authService))
-		router.POST("/api/v1/answerquestion", surveyHandler.AnswerQuestion)
-		w := httptest.NewRecorder()
+	router := getRouter()
+	db, _ := GetConnection()
+	surveyRepository := survey.NewRepository(db)
+	userRepository := user.NewRepository(db)
+	surveyService := survey.NewService(surveyRepository, userRepository)
+	surveyHandler := handler.NewSurveyHandler(surveyService)
+	authRepository := user.NewRepository(db)
+	authService := user.NewService(authRepository)
+	router.Use(auth.AuthMiddleware(authService))
+	router.POST("/api/v1/answerquestion", surveyHandler.AnswerQuestion)
+	w := httptest.NewRecorder()
 
-		answerQuestion := []survey.AnswerInput{
-			{
-				Id:         1,
-				SurveyId:   1,
-				UserId:     1,
-				QuestionId: 1,
-				Respond:    "Option 1",
-			},
-			{
-				Id:         1,
-				SurveyId:   1,
-				UserId:     1,
-				QuestionId: 2,
-				Respond:    "Option 2",
-			},
-			{
-				Id:         1,
-				SurveyId:   1,
-				UserId:     1,
-				QuestionId: 3,
-				Respond:    "Option 3",
-			},
-		}
-		var buf bytes.Buffer
+	answerQuestion := []survey.AnswerInput{
+		{
+			Id:         1,
+			SurveyId:   1,
+			UserId:     1,
+			QuestionId: 1,
+			Respond:    "Option 1",
+		},
+		{
+			Id:         1,
+			SurveyId:   1,
+			UserId:     1,
+			QuestionId: 2,
+			Respond:    "Option 2",
+		},
+		{
+			Id:         1,
+			SurveyId:   1,
+			UserId:     1,
+			QuestionId: 3,
+			Respond:    "Option 3",
+		},
+	}
+	var buf bytes.Buffer
 
-		err := json.NewEncoder(&buf).Encode(answerQuestion)
+	err := json.NewEncoder(&buf).Encode(answerQuestion)
 
-		if err != nil {
-			t.Errorf("Error encoding json")
-		}
+	if err != nil {
+		t.Errorf("Error encoding json")
+	}
 
-		req, err := http.NewRequest("POST", "http://localhost:8080/api/v1/answerquestion",&buf)
-		req.Header.Set("Content-Type", "application/json")
-		router.ServeHTTP(w, req)
+	req, err := http.NewRequest("POST", "http://localhost:8080/api/v1/answerquestion", &buf)
+	req.Header.Set("Content-Type", "application/json")
+	router.ServeHTTP(w, req)
 
-		assert.NoError(t, err)
-		assert.Equal(t, http.StatusUnauthorized, w.Code)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
 
-		var responseBody map[string]interface{}
-		body, _ := ioutil.ReadAll(w.Body)
+	var responseBody map[string]interface{}
+	body, _ := ioutil.ReadAll(w.Body)
 
-		json.Unmarshal(body, &responseBody)
+	json.Unmarshal(body, &responseBody)
 
-		assert.Equal(t, "error", responseBody["meta"].(map[string]interface{})["status"], "Status code should be error")
-		assert.Equal(t, "Header not provided", responseBody["meta"].(map[string]interface{})["message"], "Message code should be Header not provided")
+	assert.Equal(t, "error", responseBody["meta"].(map[string]interface{})["status"], "Status code should be error")
+	assert.Equal(t, "Header not provided", responseBody["meta"].(map[string]interface{})["message"], "Message code should be Header not provided")
 }
 
 func TestGetAllTransactionByIDUser_InvalidInput(t *testing.T) {
@@ -1091,6 +1091,291 @@ func TestGetAllTransactionByIDUser_InvalidInput(t *testing.T) {
 
 	assert.Equal(t, "error", responseBody["meta"].(map[string]interface{})["status"], "Status code should be error")
 	assert.Equal(t, "Invalid Input", responseBody["meta"].(map[string]interface{})["message"], "Message code should be Invalid Input")
+
+}
+func TestGetAllTransactionByIDUser_Success(t *testing.T) {
+	router := getRouter()
+	db, _ := GetConnection()
+	transactionRepository := transactions.NewRepository(db)
+	authRepository := user.NewRepository(db)
+	authService := user.NewService(authRepository)
+	transactionService := transactions.NewService(transactionRepository)
+	transactionHandler := handler.NewTransactionHandler(transactionService)
+
+	jwtWrapper := auth.JwtWrapper{
+		SecretKey:       "survosecret",
+		Issuer:          "AuthService",
+		ExpirationHours: 2,
+	}
+
+	generatedToken, _ := jwtWrapper.GenerateToken(1, "usre@mail.com")
+	validToken := "Bearer " + generatedToken
+
+	router.Use(auth.AuthMiddleware(authService))
+	router.GET("/api/v1/transaction/:id", transactionHandler.GetAllTransactionByIDUser)
+	w := httptest.NewRecorder()
+	userID := "1"
+
+	req, err := http.NewRequest("GET", "http://localhost:8080/api/v1/transaction/"+userID, nil)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", validToken)
+	router.ServeHTTP(w, req)
+
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var responseBody map[string]interface{}
+	body, _ := ioutil.ReadAll(w.Body)
+
+	json.Unmarshal(body, &responseBody)
+
+	assert.Equal(t, "success", responseBody["meta"].(map[string]interface{})["status"], "Status code should be success")
+	assert.Equal(t, "Successfully get all transactions", responseBody["meta"].(map[string]interface{})["message"], "Message code should be Successfully get all transactions")
+
+}
+func TestCreateTransactionFailedIfNotLogin(t *testing.T) {
+	router := getRouter()
+	db, _ := GetConnection()
+	transactionRepository := transactions.NewRepository(db)
+	authRepository := user.NewRepository(db)
+	authService := user.NewService(authRepository)
+	transactionService := transactions.NewService(transactionRepository)
+	transactionHandler := handler.NewTransactionHandler(transactionService)
+
+	router.Use(auth.AuthMiddleware(authService))
+	router.POST("/api/v1/createtransaction", transactionHandler.CreateTransaction)
+	w := httptest.NewRecorder()
+
+	transactionInput := transactions.CreateTransactionInput{
+		UserID: 1,
+		Amount: 10000,
+	}
+	var buf bytes.Buffer
+
+	err := json.NewEncoder(&buf).Encode(transactionInput)
+
+	if err != nil {
+		t.Errorf("Error encoding json")
+	}
+
+	req, err := http.NewRequest("POST", "http://localhost:8080/api/v1/createtransaction", &buf)
+	req.Header.Set("Content-Type", "application/json")
+	router.ServeHTTP(w, req)
+
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
+
+	var responseBody map[string]interface{}
+	body, _ := ioutil.ReadAll(w.Body)
+
+	json.Unmarshal(body, &responseBody)
+
+	assert.Equal(t, "error", responseBody["meta"].(map[string]interface{})["status"], "Status code should be error")
+	assert.Equal(t, "Header not provided", responseBody["meta"].(map[string]interface{})["message"], "Message code should be Header not provided")
+
+}
+func TestCreateTransactionFailedIfTokenNotValid(t *testing.T) {
+	router := getRouter()
+	db, _ := GetConnection()
+	transactionRepository := transactions.NewRepository(db)
+	authRepository := user.NewRepository(db)
+	authService := user.NewService(authRepository)
+	transactionService := transactions.NewService(transactionRepository)
+	transactionHandler := handler.NewTransactionHandler(transactionService)
+
+	jwtWrapper := auth.JwtWrapper{
+		SecretKey:       "survosecrets",
+		Issuer:          "AuthService",
+		ExpirationHours: 2,
+	}
+
+	generatedToken, _ := jwtWrapper.GenerateToken(1, "usre@mail.com")
+	validToken := "Bearer " + generatedToken
+
+	router.Use(auth.AuthMiddleware(authService))
+	router.POST("/api/v1/createtransaction", transactionHandler.CreateTransaction)
+	w := httptest.NewRecorder()
+
+	transactionInput := transactions.CreateTransactionInput{
+		UserID: 1,
+		Amount: 10000,
+	}
+	var buf bytes.Buffer
+
+	err := json.NewEncoder(&buf).Encode(transactionInput)
+
+	if err != nil {
+		t.Errorf("Error encoding json")
+	}
+
+	req, err := http.NewRequest("POST", "http://localhost:8080/api/v1/createtransaction", &buf)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", validToken)
+	router.ServeHTTP(w, req)
+
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
+
+	var responseBody map[string]interface{}
+	body, _ := ioutil.ReadAll(w.Body)
+
+	json.Unmarshal(body, &responseBody)
+
+	assert.Equal(t, "error", responseBody["meta"].(map[string]interface{})["status"], "Status code should be error")
+	assert.Equal(t, "Unauthorize", responseBody["meta"].(map[string]interface{})["message"], "Message code should be Unauthorize")
+
+}
+func TestCreateTransactionSuccessIfTokenValid(t *testing.T) {
+	router := getRouter()
+	db, _ := GetConnection()
+	transactionRepository := transactions.NewRepository(db)
+	authRepository := user.NewRepository(db)
+	authService := user.NewService(authRepository)
+	transactionService := transactions.NewService(transactionRepository)
+	transactionHandler := handler.NewTransactionHandler(transactionService)
+
+	jwtWrapper := auth.JwtWrapper{
+		SecretKey:       "survosecret",
+		Issuer:          "AuthService",
+		ExpirationHours: 2,
+	}
+
+	generatedToken, _ := jwtWrapper.GenerateToken(1, "usre@mail.com")
+	validToken := "Bearer " + generatedToken
+
+	router.Use(auth.AuthMiddleware(authService))
+	router.POST("/api/v1/createtransaction", transactionHandler.CreateTransaction)
+	w := httptest.NewRecorder()
+
+	transactionInput := transactions.CreateTransactionInput{
+		UserID: 1,
+		Amount: 10000,
+	}
+	var buf bytes.Buffer
+
+	err := json.NewEncoder(&buf).Encode(transactionInput)
+
+	if err != nil {
+		t.Errorf("Error encoding json")
+	}
+
+	req, err := http.NewRequest("POST", "http://localhost:8080/api/v1/createtransaction", &buf)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", validToken)
+	router.ServeHTTP(w, req)
+
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var responseBody map[string]interface{}
+	body, _ := ioutil.ReadAll(w.Body)
+
+	json.Unmarshal(body, &responseBody)
+
+	assert.Equal(t, "success", responseBody["meta"].(map[string]interface{})["status"], "Status code should be success")
+	assert.Equal(t, "Successfully create transaction", responseBody["meta"].(map[string]interface{})["message"], "Message code should be Successfully create transaction")
+
+}
+func TestTransactionPremiumFailedIfTokenNotValid(t *testing.T) {
+	router := getRouter()
+	db, _ := GetConnection()
+	transactionRepository := transactions.NewRepository(db)
+	authRepository := user.NewRepository(db)
+	authService := user.NewService(authRepository)
+	transactionService := transactions.NewService(transactionRepository)
+	transactionHandler := handler.NewTransactionHandler(transactionService)
+
+	jwtWrapper := auth.JwtWrapper{
+		SecretKey:       "survosecrets",
+		Issuer:          "AuthService",
+		ExpirationHours: 2,
+	}
+
+	generatedToken, _ := jwtWrapper.GenerateToken(1, "usre@mail.com")
+	validToken := "Bearer " + generatedToken
+	userID := "1"
+	router.Use(auth.AuthMiddleware(authService))
+	router.POST("/api/v1/transactionpremium/"+userID, transactionHandler.CreateTransactionPremium)
+	w := httptest.NewRecorder()
+
+	transactionInput := transactions.CreateTransactionInput{
+		UserID: 1,
+		Amount: 10000,
+	}
+	var buf bytes.Buffer
+
+	err := json.NewEncoder(&buf).Encode(transactionInput)
+
+	if err != nil {
+		t.Errorf("Error encoding json")
+	}
+
+	req, err := http.NewRequest("POST", "http://localhost:8080/api/v1/transactionpremium/"+userID, &buf)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", validToken)
+	router.ServeHTTP(w, req)
+
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
+
+	var responseBody map[string]interface{}
+	body, _ := ioutil.ReadAll(w.Body)
+
+	json.Unmarshal(body, &responseBody)
+
+	assert.Equal(t, "error", responseBody["meta"].(map[string]interface{})["status"], "Status code should be error")
+	assert.Equal(t, "Unauthorize", responseBody["meta"].(map[string]interface{})["message"], "Message code should be Unauthorize")
+
+}
+func TestTransactionPremiumSuccessIfTokenValid(t *testing.T) {
+	router := getRouter()
+	db, _ := GetConnection()
+	transactionRepository := transactions.NewRepository(db)
+	authRepository := user.NewRepository(db)
+	authService := user.NewService(authRepository)
+	transactionService := transactions.NewService(transactionRepository)
+	transactionHandler := handler.NewTransactionHandler(transactionService)
+
+	jwtWrapper := auth.JwtWrapper{
+		SecretKey:       "survosecret",
+		Issuer:          "AuthService",
+		ExpirationHours: 2,
+	}
+	userID := "1"
+	generatedToken, _ := jwtWrapper.GenerateToken(1, "usre@mail.com")
+	validToken := "Bearer " + generatedToken
+
+	router.Use(auth.AuthMiddleware(authService))
+	router.POST("/api/v1/createtransaction/:id", transactionHandler.CreateTransactionPremium)
+	w := httptest.NewRecorder()
+
+	transactionInput := transactions.CreateTransactionInput{
+		UserID: 1,
+		Amount: 10000,
+	}
+	var buf bytes.Buffer
+
+	err := json.NewEncoder(&buf).Encode(transactionInput)
+
+	if err != nil {
+		t.Errorf("Error encoding json")
+	}
+
+	req, err := http.NewRequest("POST", "http://localhost:8080/api/v1/createtransaction/"+userID, &buf)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", validToken)
+	router.ServeHTTP(w, req)
+
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var responseBody map[string]interface{}
+	body, _ := ioutil.ReadAll(w.Body)
+
+	json.Unmarshal(body, &responseBody)
+
+	assert.Equal(t, "success", responseBody["meta"].(map[string]interface{})["status"], "Status code should be success")
+	assert.Equal(t, "Successfully create transaction", responseBody["meta"].(map[string]interface{})["message"], "Message code should be Successfully create transaction")
 
 }
 //func TestTruncateTable(t *testing.T) {
