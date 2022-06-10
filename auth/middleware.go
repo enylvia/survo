@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
@@ -37,5 +38,18 @@ func AuthMiddleware(authService user.Service) gin.HandlerFunc {
 		userID := claims.UserID
 		user , _ := authService.GetUserByID(userID)
 		c.Set("claims",user)
+	}
+}
+
+func AuthAdminMiddleware() gin.HandlerFunc{
+	return func(c *gin.Context) {
+		session := sessions.Default(c)
+
+		userIDSession := session.Get("userID")
+
+		if userIDSession == nil {
+			c.Redirect(http.StatusFound,"/admin/dashboard")
+			return
+		}
 	}
 }

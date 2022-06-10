@@ -15,6 +15,7 @@ type User struct {
 	Image      string        `gorm:"type:varchar(100); nullable"`
 	Phone      string        `gorm:"type:varchar(100); nullable"`
 	Birthday   string        `gorm:"type:varchar(100); nullable"`
+	IsAdmin	string	`gorm:"type:varchar(20); nullable"`
 	Attribut   Attribut      `gorm:"ForeignKey:UserId"`
 	Survey     survey.Survey `gorm:"ForeignKey:UserId"`
 	Question     survey.Question `gorm:"ForeignKey:UserId"`

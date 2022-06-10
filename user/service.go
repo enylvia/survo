@@ -12,6 +12,8 @@ type Service interface {
 	GetUserByEmail(email string) (User, error)
 	GetUserByID(userID int) (User, error)
 	UploadAvatar(userID int , filePath string) (User, error)
+	GetAllUser()([]User,error)
+	DeleteUser(userID int)(error)
 }
 
 type service struct {
@@ -21,7 +23,21 @@ type service struct {
 func NewService(repository Repository) *service {
 	return &service{repository}
 }
-
+func (s *service)DeleteUser(userID int)(error){
+	findUser,_ := s.repository.FindByID(userID)
+	err := s.repository.Delete(int(findUser.Id))
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func (s *service)GetAllUser()([]User,error){
+	users,err := s.repository.FindAll()
+	if err != nil {
+		return users,err
+	}
+	return users,nil
+}
 func (s *service) RegisterUserForm(input RegisterInput) (User, error) {
 	var user User
 
@@ -29,6 +45,7 @@ func (s *service) RegisterUserForm(input RegisterInput) (User, error) {
 	user.Email = input.Email
 	user.Username = input.Username
 	user.Occupation = input.Occupation
+	user.IsAdmin = "user"
 	hashPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.MinCost)
 	user.Password = string(hashPassword)
 	data, err := s.repository.Create(user)

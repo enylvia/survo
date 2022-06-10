@@ -4,6 +4,7 @@ import "strings"
 
 type SurveyFormatter struct {
 	ID        int                 `json:"id"`
+	UserId 	int `json:"user_id"`
 	Title     string              `json:"title"`
 	Summary   string              `json:"summary"`
 	Category  string              `json:"category"`
@@ -31,6 +32,7 @@ type AnswerFormatter struct {
 func FormatSurvey(survey Survey) SurveyFormatter {
 	formatter := SurveyFormatter{
 		ID:       int(survey.Id),
+		UserId:   int(survey.UserId),
 		Title:    survey.Title,
 		Summary:  survey.Summary,
 		Category: survey.Category,

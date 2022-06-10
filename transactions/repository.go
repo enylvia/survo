@@ -12,10 +12,28 @@ type Repository interface {
 	GetTransaction() ([]Transaction, error)
 	GetDataTransactionbyIDUser(id int) ([]Transaction, error)
 	CreateTransaction(transaction Transaction) (Transaction,error)
+	UpdateTransaction (transaction Transaction) (Transaction,error)
+	GetTransactionByID(id int)(Transaction, error)
 }
 
 func NewRepository(db *gorm.DB) *repository {
 	return &repository{db}
+}
+func (r *repository)GetTransactionByID(id int)(Transaction, error){
+	var transaction Transaction
+
+	err := r.db.Where("id = ?", id).Find(&transaction).Error
+	if err != nil {
+		return transaction, err
+	}
+	return transaction, nil
+}
+func (r *repository)UpdateTransaction(transaction Transaction)(Transaction,error){
+	err := r.db.Save(&transaction).Error
+	if err != nil {
+		return transaction,err
+	}
+	return transaction,nil
 }
 
 func (r *repository) GetTransaction() ([]Transaction, error) {

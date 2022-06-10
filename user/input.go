@@ -10,8 +10,8 @@ type RegisterInput struct {
 }
 
 type LoginInput struct {
-	Email    string `json:"email" binding:"required"`
-	Password string `json:"password" binding:"required"`
+	Email    string `json:"email" form:"email" binding:"required"`
+	Password string `json:"password" form:"password" binding:"required"`
 }
 
 type UpdateInput struct {
@@ -30,8 +30,4 @@ type DetailUserInput struct {
 
 type UserImageInput struct {
 	UserId int `form:"user_id" binding:"required"`
-}
-
-type UpdateAttributInput struct {
-
 }

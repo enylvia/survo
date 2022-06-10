@@ -11,7 +11,8 @@ type Repository interface {
 	Update(user User) (User, error)
 	CreateAttribut(attribut Attribut)
 	UpdateAttribut(attribut Attribut)
-
+	FindAll() ([]User, error)
+	Delete(id int) (error)
 }
 
 type repository struct {
@@ -29,7 +30,7 @@ func (r *repository) Create(user User) (User, error) {
 	if err != nil {
 		return user, err
 	}
-	return user,nil
+	return user, nil
 }
 
 func (r *repository) FindByEmail(email string) (User, error) {
@@ -44,11 +45,11 @@ func (r *repository) FindByEmail(email string) (User, error) {
 func (r *repository) FindByID(id int) (User, error) {
 	var user User
 	//var attrib Attribut
-	err := r.db.Preload("Attribut").Where("id = ?",id).Find(&user).Error
+	err := r.db.Preload("Attribut").Where("id = ?", id).Find(&user).Error
 	if err != nil {
-		return user,err
+		return user, err
 	}
-	return user , nil
+	return user, nil
 }
 
 func (r *repository) Update(user User) (User, error) {
@@ -56,10 +57,10 @@ func (r *repository) Update(user User) (User, error) {
 	if err != nil {
 		return user, err
 	}
-	return user,nil
+	return user, nil
 }
 
-func (r *repository) CreateAttribut (attribut Attribut){
+func (r *repository) CreateAttribut(attribut Attribut) {
 	err := r.db.Create(&attribut).Error
 	if err != nil {
 		return
@@ -67,7 +68,7 @@ func (r *repository) CreateAttribut (attribut Attribut){
 	return
 }
 
-func (r *repository) UpdateAttribut(attribut Attribut){
+func (r *repository) UpdateAttribut(attribut Attribut) {
 	err := r.db.Save(&attribut).Error
 	if err != nil {
 		return
@@ -75,4 +76,21 @@ func (r *repository) UpdateAttribut(attribut Attribut){
 	return
 }
 
+func (r *repository) FindAll() ([]User, error) {
+	var users []User
 
+	err := r.db.Find(&users).Error
+	if err != nil {
+		return users,err
+	}
+	return users,nil
+}
+
+func (r *repository)Delete(id int)(error){
+	var user User
+	err := r.db.Unscoped().Delete(&user, "id = ?",id).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}

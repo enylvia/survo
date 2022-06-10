@@ -14,6 +14,7 @@ type User struct {
 	Image      string
 	Phone      string
 	Birthday   string
+	IsAdmin		string
 	Attribut   Attribut
 	CreatedAt time.Time
 	UpdatedAt time.Time

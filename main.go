@@ -1,15 +1,22 @@
 package main
 
 import (
+	"github.com/gin-contrib/cors"
+	"github.com/gin-contrib/multitemplate"
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"log"
+	"path/filepath"
 	"survorest/auth"
 	"survorest/handler"
 	"survorest/survey"
 	"survorest/transactions"
 	"survorest/user"
+
+	webHandler "survorest/web/handler"
 )
 
 func main() {
@@ -32,11 +39,21 @@ func main() {
 	surveyHandler := handler.NewSurveyHandler(surveyService)
 	transactionHandler := handler.NewTransactionHandler(transactionService)
 	googleHandler := auth.GoogleService(userRepository)
-	router := gin.Default()
-	//router.Use(cors.Default())
 
-	// static image route
+	userWebHandler := webHandler.NewUserHandler(userService)
+	surveyWebHandler := webHandler.NewSurveyHandler(surveyService)
+	transactionWebHandler := webHandler.NewTransactionHandler(transactionService)
+	router := gin.Default()
+	router.Use(cors.Default())
+
+	cookieStore := cookie.NewStore([]byte("survosecret"))
+	router.Use(sessions.Sessions("survostartup", cookieStore))
+
 	router.Static("/images", "./images")
+	router.Static("/css", "./web/assets/css")
+	router.Static("/js", "./web/assets/js")
+	router.HTMLRender = loadTemplates("./web/templates")
+
 	api := router.Group("/api/v1")
 	api.POST("/register", userHandler.RegisterUser)
 	api.POST("/login", userHandler.LoginUser)
@@ -57,7 +74,42 @@ func main() {
 	api.POST("/answerquestion", surveyHandler.AnswerQuestion)
 	api.GET("/transaction/:id", transactionHandler.GetAllTransactionByIDUser)
 	api.POST("/transactionpremium", transactionHandler.CreateTransactionPremium)
-	api.POST("/transactionwithdraw",transactionHandler.CreateTransaction)
+	api.POST("/transactionwithdraw", transactionHandler.CreateTransaction)
+
+
+	cms := router.Group("/admin")
+	cms.GET("/dashboard", userWebHandler.Dashboard)
+	cms.POST("/session", userWebHandler.Create)
+	cms.Use(auth.AuthAdminMiddleware())
+	cms.GET("/logout", userWebHandler.Destroy)
+	cms.GET("/users", userWebHandler.Index)
+	cms.GET("/user/delete/:id", userWebHandler.Delete)
+	cms.GET("/surveys", surveyWebHandler.IndexSurvey)
+	cms.GET("/transactions", transactionWebHandler.IndexTransaction)
+	cms.GET("/transactions/update/:id", transactionWebHandler.UpdateTransaction)
 
 	router.Run(":8080")
 }
+
+func loadTemplates(templatesDir string) multitemplate.Renderer {
+	r := multitemplate.NewRenderer()
+
+	layouts, err := filepath.Glob(templatesDir + "/layouts/*")
+	if err != nil {
+		panic(err.Error())
+	}
+
+	includes, err := filepath.Glob(templatesDir + "/**/*")
+	if err != nil {
+		panic(err.Error())
+	}
+
+	for _, include := range includes {
+		layoutCopy := make([]string, len(layouts))
+		copy(layoutCopy, layouts)
+		files := append(layoutCopy, include)
+		r.AddFromFiles(filepath.Base(include), files...)
+	}
+	return r
+}
+

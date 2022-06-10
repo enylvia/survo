@@ -1,0 +1,36 @@
+{{define "content"}}
+<div class="container-fluid py-5">
+    <div class="card">
+        <h5 class="py-3 px-3">List Pengguna Terdaftar</h5>
+        <div class="card-body">
+            <table class="table table-bordered table-hover mb-0">
+                <thead>
+                    <tr>
+                        <td>ID USER</td>
+                        <td>Full Name</td>
+                        <td>Username</td>
+                        <td>Email</td>
+                        <td>Occupation</td>
+                        <td>Option</td>
+                    </tr>
+                </thead>
+                <tbody>
+                {{range .users}}
+                <tr>
+                    <td>{{.Id}}</td>
+                    <td>{{.FullName}}</td>
+                    <td>{{.Username}}</td>
+                    <td>{{.Email}}</td>
+                    <td>{{.Occupation}}</td>
+                    <td>
+                        <a href="/admin/user/delete/{{.Id}}" class="btn btn-sm btn-danger">DELETE</a>
+                    </td>
+                </tr>
+                {{end}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{{ end }}
