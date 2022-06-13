@@ -20,7 +20,7 @@ import (
 )
 
 func main() {
-	dsn := "root:@tcp(127.0.0.1:3306)/survo?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := "survo:AVNS_pgQn9ILGvDm12asuTG2@tcp(survo-db-do-user-11081946-0.b.db.ondigitalocean.com:25060)/survo?charset=utf8mb4&parseTime=True&loc=Local"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
 	if err != nil {
@@ -76,17 +76,15 @@ func main() {
 	api.POST("/transactionpremium", transactionHandler.CreateTransactionPremium)
 	api.POST("/transactionwithdraw", transactionHandler.CreateTransaction)
 
-
-	cms := router.Group("/admin")
-	cms.GET("/dashboard", userWebHandler.Dashboard)
-	cms.POST("/session", userWebHandler.Create)
-	cms.Use(auth.AuthAdminMiddleware())
-	cms.GET("/logout", userWebHandler.Destroy)
-	cms.GET("/users", userWebHandler.Index)
-	cms.GET("/user/delete/:id", userWebHandler.Delete)
-	cms.GET("/surveys", surveyWebHandler.IndexSurvey)
-	cms.GET("/transactions", transactionWebHandler.IndexTransaction)
-	cms.GET("/transactions/update/:id", transactionWebHandler.UpdateTransaction)
+	router.GET("/dashboard", userWebHandler.Dashboard)
+	router.POST("/session", userWebHandler.Create)
+	router.Use(auth.AuthAdminMiddleware())
+	router.GET("/logout", userWebHandler.Destroy)
+	router.GET("/users", userWebHandler.Index)
+	router.GET("/user/delete/:id", userWebHandler.Delete)
+	router.GET("/surveys", surveyWebHandler.IndexSurvey)
+	router.GET("/transactions", transactionWebHandler.IndexTransaction)
+	router.GET("/transactions/update/:id", transactionWebHandler.UpdateTransaction)
 
 	router.Run(":8080")
 }
@@ -112,4 +110,3 @@ func loadTemplates(templatesDir string) multitemplate.Renderer {
 	}
 	return r
 }
-

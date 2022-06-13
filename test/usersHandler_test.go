@@ -42,7 +42,7 @@ func GenerateJWT(id int, email string) (token string, err error) {
 	return generatedToken, nil
 }
 func GetConnection() (*gorm.DB, error) {
-	dsn := "root:@tcp(127.0.0.1:3306)/survo?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := "survo:AVNS_pgQn9ILGvDm12asuTG2@tcp(survo-db-do-user-11081946-0.b.db.ondigitalocean.com:25060)/survo?charset=utf8mb4&parseTime=True&loc=Local"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return nil, err
