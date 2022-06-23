@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 	"path/filepath"
 	"survorest/auth"
 	"survorest/handler"
@@ -90,7 +91,11 @@ func main() {
 	router.GET("/transactions", transactionWebHandler.IndexTransaction)
 	router.GET("/transactions/update/:id", transactionWebHandler.UpdateTransaction)
 
-	router.Run(":8080")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	router.Run(":" + port)
 }
 
 func loadTemplates(templatesDir string) multitemplate.Renderer {
