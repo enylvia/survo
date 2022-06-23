@@ -207,7 +207,7 @@ func (db *DB) FindInBatches(dest interface{}, batchSize int, fc func(tx *DB, bat
 	return tx
 }
 
-func (tx *DB) assignInterfacesToValue(values ...interface{}) {
+func (db *DB) assignInterfacesToValue(values ...interface{}) {
 	for _, value := range values {
 		switch v := value.(type) {
 		case []clause.Expression:
@@ -215,46 +215,47 @@ func (tx *DB) assignInterfacesToValue(values ...interface{}) {
 				if eq, ok := expr.(clause.Eq); ok {
 					switch column := eq.Column.(type) {
 					case string:
-						if field := tx.Statement.Schema.LookUpField(column); field != nil {
-							tx.AddError(field.Set(tx.Statement.Context, tx.Statement.ReflectValue, eq.Value))
+						if field := db.Statement.Schema.LookUpField(column); field != nil {
+							db.AddError(field.Set(db.Statement.Context, db.Statement.ReflectValue, eq.Value))
 						}
 					case clause.Column:
-						if field := tx.Statement.Schema.LookUpField(column.Name); field != nil {
-							tx.AddError(field.Set(tx.Statement.Context, tx.Statement.ReflectValue, eq.Value))
+						if field := db.Statement.Schema.LookUpField(column.Name); field != nil {
+							db.AddError(field.Set(db.Statement.Context, db.Statement.ReflectValue, eq.Value))
 						}
 					}
 				} else if andCond, ok := expr.(clause.AndConditions); ok {
-					tx.assignInterfacesToValue(andCond.Exprs)
+					db.assignInterfacesToValue(andCond.Exprs)
 				}
 			}
 		case clause.Expression, map[string]string, map[interface{}]interface{}, map[string]interface{}:
-			if exprs := tx.Statement.BuildCondition(value); len(exprs) > 0 {
-				tx.assignInterfacesToValue(exprs)
+			if exprs := db.Statement.BuildCondition(value); len(exprs) > 0 {
+				db.assignInterfacesToValue(exprs)
 			}
 		default:
-			if s, err := schema.Parse(value, tx.cacheStore, tx.NamingStrategy); err == nil {
+			if s, err := schema.Parse(value, db.cacheStore, db.NamingStrategy); err == nil {
 				reflectValue := reflect.Indirect(reflect.ValueOf(value))
 				switch reflectValue.Kind() {
 				case reflect.Struct:
 					for _, f := range s.Fields {
 						if f.Readable {
-							if v, isZero := f.ValueOf(tx.Statement.Context, reflectValue); !isZero {
-								if field := tx.Statement.Schema.LookUpField(f.Name); field != nil {
-									tx.AddError(field.Set(tx.Statement.Context, tx.Statement.ReflectValue, v))
+							if v, isZero := f.ValueOf(db.Statement.Context, reflectValue); !isZero {
+								if field := db.Statement.Schema.LookUpField(f.Name); field != nil {
+									db.AddError(field.Set(db.Statement.Context, db.Statement.ReflectValue, v))
 								}
 							}
 						}
 					}
 				}
 			} else if len(values) > 0 {
-				if exprs := tx.Statement.BuildCondition(values[0], values[1:]...); len(exprs) > 0 {
-					tx.assignInterfacesToValue(exprs)
+				if exprs := db.Statement.BuildCondition(values[0], values[1:]...); len(exprs) > 0 {
+					db.assignInterfacesToValue(exprs)
 				}
 				return
 			}
 		}
 	}
 }
+
 // FirstOrInit gets the first matched record or initialize a new instance with given conditions (only works with struct or map conditions)
 func (db *DB) FirstOrInit(dest interface{}, conds ...interface{}) (tx *DB) {
 	queryTx := db.Limit(1).Order(clause.OrderByColumn{
@@ -368,10 +369,6 @@ func (db *DB) Delete(value interface{}, conds ...interface{}) (tx *DB) {
 
 func (db *DB) Count(count *int64) (tx *DB) {
 	tx = db.getInstance()
-	if len(tx.Statement.Preloads) > 0 {
-		tx.AddError(ErrPreloadNotAllowed)
-		return
-	}
 	if tx.Statement.Model == nil {
 		tx.Statement.Model = tx.Statement.Dest
 		defer func() {
@@ -590,7 +587,7 @@ func (db *DB) Transaction(fc func(tx *DB) error, opts ...*sql.TxOptions) (err er
 func (db *DB) Begin(opts ...*sql.TxOptions) *DB {
 	var (
 		// clone statement
-		tx  = db.getInstance().Session(&Session{Context: db.Statement.Context})
+		tx  = db.getInstance().Session(&Session{Context: db.Statement.Context, NewDB: db.clone == 1})
 		opt *sql.TxOptions
 		err error
 	)
@@ -599,11 +596,12 @@ func (db *DB) Begin(opts ...*sql.TxOptions) *DB {
 		opt = opts[0]
 	}
 
-	if beginner, ok := tx.Statement.ConnPool.(TxBeginner); ok {
+	switch beginner := tx.Statement.ConnPool.(type) {
+	case TxBeginner:
 		tx.Statement.ConnPool, err = beginner.BeginTx(tx.Statement.Context, opt)
-	} else if beginner, ok := tx.Statement.ConnPool.(ConnPoolBeginner); ok {
+	case ConnPoolBeginner:
 		tx.Statement.ConnPool, err = beginner.BeginTx(tx.Statement.Context, opt)
-	} else {
+	default:
 		err = ErrInvalidTransaction
 	}
 

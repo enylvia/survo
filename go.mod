@@ -15,5 +15,6 @@ require (
 	golang.org/x/crypto v0.0.0-20220214200702-86341886e292
 	golang.org/x/oauth2 v0.0.0-20220309155454-6242fa91716a
 	gorm.io/driver/mysql v1.3.2
-	gorm.io/gorm v1.23.1
+	gorm.io/driver/postgres v1.3.7
+	gorm.io/gorm v1.23.4
 )

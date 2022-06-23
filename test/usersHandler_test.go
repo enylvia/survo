@@ -4,10 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/stretchr/testify/assert"
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -20,6 +16,11 @@ import (
 	"survorest/transactions"
 	"survorest/user"
 	"testing"
+
+	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 func getRouter() *gin.Engine {
@@ -42,8 +43,8 @@ func GenerateJWT(id int, email string) (token string, err error) {
 	return generatedToken, nil
 }
 func GetConnection() (*gorm.DB, error) {
-	dsn := "survo:AVNS_pgQn9ILGvDm12asuTG2@tcp(survo-db-do-user-11081946-0.b.db.ondigitalocean.com:25060)/survo?charset=utf8mb4&parseTime=True&loc=Local"
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	dsn := "postgres://ndgownkmqbplmm:e9ae287ceccf8d993e76540c09f9297328db128f5be24ce932a9a9bf8bb65e4f@ec2-23-23-151-191.compute-1.amazonaws.com:5432/d3mhbf33iu0k5b"
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return nil, err
 	}
@@ -1378,6 +1379,7 @@ func TestTransactionPremiumSuccessIfTokenValid(t *testing.T) {
 	assert.Equal(t, "Successfully create transaction", responseBody["meta"].(map[string]interface{})["message"], "Message code should be Successfully create transaction")
 
 }
+
 //func TestTruncateTable(t *testing.T) {
 //	db, _ := GetConnection()
 //	TruncateTable(db)
