@@ -48,7 +48,7 @@ func AuthAdminMiddleware() gin.HandlerFunc{
 		userIDSession := session.Get("userID")
 
 		if userIDSession == nil {
-			c.Redirect(http.StatusFound,"/admin/dashboard")
+			c.Redirect(http.StatusFound,"/dashboard")
 			return
 		}
 	}
