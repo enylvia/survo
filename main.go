@@ -1,13 +1,6 @@
 package main
 
 import (
-	"github.com/gin-contrib/cors"
-	"github.com/gin-contrib/multitemplate"
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-contrib/sessions/cookie"
-	"github.com/gin-gonic/gin"
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
 	"log"
 	"path/filepath"
 	"survorest/auth"
@@ -15,6 +8,14 @@ import (
 	"survorest/survey"
 	"survorest/transactions"
 	"survorest/user"
+
+	"github.com/gin-contrib/cors"
+	"github.com/gin-contrib/multitemplate"
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
+	"github.com/gin-gonic/gin"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 
 	webHandler "survorest/web/handler"
 )
