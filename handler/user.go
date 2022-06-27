@@ -2,12 +2,13 @@ package handler
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
 	"survorest/auth"
 	"survorest/helper"
 	"survorest/user"
+
+	"github.com/gin-gonic/gin"
 )
 
 type userHandler struct {

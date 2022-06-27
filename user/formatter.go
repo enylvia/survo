@@ -1,12 +1,12 @@
 package user
 
 type UserFormatter struct {
-	ID         int    `json:"id"`
-	FullName   string `json:"fullName"`
-	Occupation string `json:"occupation"`
-	Email      string `json:"email"`
-	Token      string `json:"token"`
-	Attribute AttributFormatter `json:"attribute"`
+	ID         int               `json:"id"`
+	FullName   string            `json:"fullName"`
+	Occupation string            `json:"occupation"`
+	Email      string            `json:"email"`
+	Token      string            `json:"token"`
+	Attribute  AttributFormatter `json:"attribute"`
 }
 type UserFormatterLogin struct {
 	ID         int    `json:"id"`
@@ -22,22 +22,22 @@ type UserFormatterRegister struct {
 	Email      string `json:"email"`
 }
 type UserDetail struct {
-	ID       int    `json:"id"`
-	FullName string `json:"fullName"`
-	Email    string `json:"email"`
-	Username string `json:"username"`
-	Image    string `json:"image_path"`
-	Phone    string `json:"phone"`
-	Birthday string `json:"birthday"`
+	ID        int               `json:"id"`
+	FullName  string            `json:"fullName"`
+	Email     string            `json:"email"`
+	Username  string            `json:"username"`
+	Image     string            `json:"image_path"`
+	Phone     string            `json:"phone"`
+	Birthday  string            `json:"birthday"`
 	Attribute AttributFormatter `json:"attribute"`
 }
 type AttributFormatter struct {
-	UserId     	uint 	`json:"user_id"`
-	PostedSurvey int `json:"posted_survey"`
-	TotalRespondent int `json:"total_respondent"`
-	ParticipateSurvey int `json:"participate_survey"`
-	IsPremium 	bool 	`json:"is_premium"`
-	Balance 	int 	`json:"balance"`
+	UserId            uint `json:"user_id"`
+	PostedSurvey      int  `json:"posted_survey"`
+	TotalRespondent   int  `json:"total_respondent"`
+	ParticipateSurvey int  `json:"participate_survey"`
+	IsPremium         bool `json:"is_premium"`
+	Balance           int  `json:"balance"`
 }
 
 func FormatUser(user User, token string) UserFormatterLogin {
@@ -63,12 +63,12 @@ func FormatUserRegister(user User) UserFormatterRegister {
 func FormatDetailUser(user User) UserDetail {
 	formatter := UserDetail{}
 	formatter.ID = int(user.Id)
-	formatter.FullName= user.FullName
-	formatter.Email=    user.Email
-	formatter.Username= user.Username
-	formatter.Image=    user.Image
-	formatter.Phone=    user.Phone
-	formatter.Birthday= user.Birthday
+	formatter.FullName = user.FullName
+	formatter.Email = user.Email
+	formatter.Username = user.Username
+	formatter.Image = user.Image
+	formatter.Phone = user.Phone
+	formatter.Birthday = user.Birthday
 
 	attrib := user.Attribut
 	attributFormatter := AttributFormatter{}

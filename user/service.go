@@ -2,6 +2,7 @@ package user
 
 import (
 	"errors"
+
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -11,9 +12,9 @@ type Service interface {
 	UpdateUserForm(inputID DetailUserInput, input UpdateInput) (User, error)
 	GetUserByEmail(email string) (User, error)
 	GetUserByID(userID int) (User, error)
-	UploadAvatar(userID int , filePath string) (User, error)
-	GetAllUser()([]User,error)
-	DeleteUser(userID int)(error)
+	UploadAvatar(userID int, filePath string) (User, error)
+	GetAllUser() ([]User, error)
+	DeleteUser(userID int) error
 }
 
 type service struct {
@@ -23,20 +24,20 @@ type service struct {
 func NewService(repository Repository) *service {
 	return &service{repository}
 }
-func (s *service)DeleteUser(userID int)(error){
-	findUser,_ := s.repository.FindByID(userID)
+func (s *service) DeleteUser(userID int) error {
+	findUser, _ := s.repository.FindByID(userID)
 	err := s.repository.Delete(int(findUser.Id))
 	if err != nil {
 		return err
 	}
 	return nil
 }
-func (s *service)GetAllUser()([]User,error){
-	users,err := s.repository.FindAll()
+func (s *service) GetAllUser() ([]User, error) {
+	users, err := s.repository.FindAll()
 	if err != nil {
-		return users,err
+		return users, err
 	}
-	return users,nil
+	return users, nil
 }
 func (s *service) RegisterUserForm(input RegisterInput) (User, error) {
 	var user User
@@ -86,7 +87,7 @@ func (s *service) LoginUserForm(input LoginInput) (User, error) {
 
 }
 
-func (s *service) UpdateUserForm(inputID DetailUserInput, input UpdateInput,) (User, error) {
+func (s *service) UpdateUserForm(inputID DetailUserInput, input UpdateInput) (User, error) {
 	user, err := s.repository.FindByID(inputID.ID)
 	if err != nil {
 		return user, err
@@ -97,8 +98,8 @@ func (s *service) UpdateUserForm(inputID DetailUserInput, input UpdateInput,) (U
 	user.FullName = input.FullName
 	user.Email = input.Email
 	user.Username = input.Username
-	if input.Password == ""{
-		return user , errors.New("please input your password")
+	if input.Password == "" {
+		return user, errors.New("please input your password")
 	}
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password))
 	if err != nil {
@@ -109,14 +110,14 @@ func (s *service) UpdateUserForm(inputID DetailUserInput, input UpdateInput,) (U
 	user.Phone = input.Phone
 	user.Birthday = input.Birthday
 
-	newData , err := s.repository.Update(user)
+	newData, err := s.repository.Update(user)
 	if err != nil {
 		return newData, err
 	}
 	return newData, nil
 
 }
-func (s *service)UploadAvatar(userID int , filePath string) (User, error) {
+func (s *service) UploadAvatar(userID int, filePath string) (User, error) {
 	user, err := s.repository.FindByID(userID)
 	if err != nil {
 		return user, err
@@ -125,14 +126,14 @@ func (s *service)UploadAvatar(userID int , filePath string) (User, error) {
 		return user, errors.New("user not found")
 	}
 	user.Image = filePath
-	newData , err := s.repository.Update(user)
+	newData, err := s.repository.Update(user)
 	if err != nil {
 		return newData, err
 	}
 	return newData, nil
 }
 
-func (s *service)GetUserByEmail(email string) (User, error){
+func (s *service) GetUserByEmail(email string) (User, error) {
 	user, err := s.repository.FindByEmail(email)
 	if err != nil {
 		return user, err
@@ -142,7 +143,7 @@ func (s *service)GetUserByEmail(email string) (User, error){
 	}
 	return user, nil
 }
-func (s *service)GetUserByID(userID int) (User, error){
+func (s *service) GetUserByID(userID int) (User, error) {
 	user, err := s.repository.FindByID(userID)
 	if err != nil {
 		return user, err
