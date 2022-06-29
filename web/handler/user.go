@@ -25,12 +25,12 @@ func (h *userHandler) Create(c *gin.Context) {
 
 	err := c.ShouldBind(&input)
 	if err != nil {
-		c.Redirect(http.StatusFound, "/admin/dashboard")
+		c.Redirect(http.StatusFound, "/dashboard")
 		return
 	}
 	user, err := h.userService.LoginUserForm(input)
 	if err != nil || user.IsAdmin != "admin" {
-		c.Redirect(http.StatusFound, "/admin/dashboard")
+		c.Redirect(http.StatusFound, "/dashboard")
 		return
 	}
 	session := sessions.Default(c)
@@ -38,7 +38,7 @@ func (h *userHandler) Create(c *gin.Context) {
 	session.Set("username", user.FullName)
 	session.Save()
 
-	c.Redirect(http.StatusFound, "/admin/users")
+	c.Redirect(http.StatusFound, "/users")
 
 }
 
