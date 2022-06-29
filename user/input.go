@@ -7,6 +7,7 @@ type RegisterInput struct {
 	Occupation           string `json:"occupation" binding:"required"`
 	Password             string `json:"password" binding:"required,min=8,max=32"`
 	PasswordConfirmation string `json:"passwordConfirmation" binding:"required,eqfield=Password"`
+	IsAdmin              string `json:"isAdmin"`
 }
 
 type LoginInput struct {
