@@ -82,7 +82,7 @@ func main() {
 
 	router.GET("/dashboard", userWebHandler.Dashboard)
 	router.POST("/session", userWebHandler.Create)
-	router.Use(auth.AuthAdminMiddleware())
+	// router.Use(auth.AuthAdminMiddleware())
 	router.GET("/logout", userWebHandler.Destroy)
 	router.GET("/users", userWebHandler.Index)
 	router.GET("/user/delete/:id", userWebHandler.Delete)

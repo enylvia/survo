@@ -1,11 +1,12 @@
 package handler
 
 import (
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
 	"survorest/user"
+
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-gonic/gin"
 )
 
 type userHandler struct {
@@ -37,11 +38,11 @@ func (h *userHandler) Create(c *gin.Context) {
 	session.Set("username", user.FullName)
 	session.Save()
 
-	c.Redirect(http.StatusFound,"/admin/users")
+	c.Redirect(http.StatusFound, "/admin/users")
 
 }
 
-func (h *userHandler)Destroy(c *gin.Context){
+func (h *userHandler) Destroy(c *gin.Context) {
 	session := sessions.Default(c)
 	session.Clear()
 	session.Save()
