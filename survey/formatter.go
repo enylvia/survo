@@ -4,7 +4,7 @@ import "strings"
 
 type SurveyFormatter struct {
 	ID        int                 `json:"id"`
-	UserId 	int `json:"user_id"`
+	UserId    int                 `json:"user_id"`
 	Title     string              `json:"title"`
 	Summary   string              `json:"summary"`
 	Category  string              `json:"category"`

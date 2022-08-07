@@ -25,6 +25,9 @@ func NewService(repository Repository) *service {
 	return &service{repository}
 }
 func (s *service) DeleteUser(userID int) error {
+	if userID == 0 {
+		return errors.New("user not found")
+	}
 	findUser, _ := s.repository.FindByID(userID)
 	err := s.repository.Delete(int(findUser.Id))
 	if err != nil {
@@ -43,12 +46,19 @@ func (s *service) RegisterUserForm(input RegisterInput) (User, error) {
 	var user User
 
 	user.FullName = input.FullName
+	if input.Email == "" {
+		return user, errors.New("email is required")
+	}
 	user.Email = input.Email
 	user.Username = input.Username
 	user.Occupation = input.Occupation
 	user.IsAdmin = "user"
 	hashPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.MinCost)
+	if err != nil {
+		return user, err
+	}
 	user.Password = string(hashPassword)
+	user.Password = input.Password
 	data, err := s.repository.Create(user)
 	if err != nil {
 		return data, err

@@ -1,12 +1,13 @@
 package handler
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
 	"survorest/helper"
 	"survorest/survey"
 	"survorest/user"
+
+	"github.com/gin-gonic/gin"
 )
 
 type surveyHandler struct {
@@ -102,7 +103,7 @@ func (h *surveyHandler) AnswerQuestion(c *gin.Context) {
 
 }
 
-func (h *surveyHandler) GetRespondSurvey (c *gin.Context){
+func (h *surveyHandler) GetRespondSurvey(c *gin.Context) {
 	var survey_id survey.SurveyDetailID
 
 	err := c.ShouldBindUri(&survey_id)
@@ -112,7 +113,7 @@ func (h *surveyHandler) GetRespondSurvey (c *gin.Context){
 		c.JSON(http.StatusUnprocessableEntity, response)
 		return
 	}
-	respond , err := h.surveyService.GetRespondSurvey(survey_id.ID)
+	respond, err := h.surveyService.GetRespondSurvey(survey_id.ID)
 	if err != nil {
 		errorMessage := gin.H{"error": err.Error()}
 		response := helper.ApiResponse("Failed to get respond", http.StatusBadRequest, "error", errorMessage)

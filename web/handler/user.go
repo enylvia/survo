@@ -47,7 +47,7 @@ func (h *userHandler) Destroy(c *gin.Context) {
 	session.Clear()
 	session.Save()
 
-	c.Redirect(http.StatusFound, "/admin/dashboard")
+	c.Redirect(http.StatusFound, "/dashboard")
 }
 func (h *userHandler) Index(c *gin.Context) {
 	users, err := h.userService.GetAllUser()
@@ -65,5 +65,5 @@ func (h *userHandler) Delete(c *gin.Context) {
 	if err != nil {
 		c.HTML(http.StatusInternalServerError, "error.html", nil)
 	}
-	c.Redirect(http.StatusFound, "/admin/users")
+	c.Redirect(http.StatusFound, "/users")
 }

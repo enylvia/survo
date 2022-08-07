@@ -1,21 +1,22 @@
 package handler
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"survorest/helper"
 	"survorest/transactions"
+
+	"github.com/gin-gonic/gin"
 )
 
 type transactionHandler struct {
 	service transactions.Service
 }
 
-func NewTransactionHandler (service transactions.Service) *transactionHandler {
+func NewTransactionHandler(service transactions.Service) *transactionHandler {
 	return &transactionHandler{service}
 }
 
-func (h *transactionHandler)CreateTransaction(c *gin.Context){
+func (h *transactionHandler) CreateTransaction(c *gin.Context) {
 	var input transactions.CreateTransactionInput
 
 	err := c.ShouldBindJSON(&input)
@@ -24,12 +25,12 @@ func (h *transactionHandler)CreateTransaction(c *gin.Context){
 		c.JSON(http.StatusUnprocessableEntity, response)
 		return
 	}
-	transaction,_ := h.service.CreateTransactionWithdraw(input)
+	transaction, _ := h.service.CreateTransactionWithdraw(input)
 	response := helper.ApiResponse("Successfully create transaction", http.StatusOK, "success", transaction)
 	c.JSON(http.StatusOK, response)
 
 }
-func (h *transactionHandler)CreateTransactionPremium(c *gin.Context){
+func (h *transactionHandler) CreateTransactionPremium(c *gin.Context) {
 	var input transactions.CreateTransactionPremium
 
 	err := c.ShouldBindUri(&input)
@@ -38,18 +39,18 @@ func (h *transactionHandler)CreateTransactionPremium(c *gin.Context){
 		c.JSON(http.StatusUnprocessableEntity, response)
 		return
 	}
-	transaction,_ := h.service.CreateTransactionPremium(input)
+	transaction, _ := h.service.CreateTransactionPremium(input)
 	response := helper.ApiResponse("Successfully create transaction", http.StatusOK, "success", transaction)
 	c.JSON(http.StatusOK, response)
 
 }
 
-func (h *transactionHandler)GetAllTransaction (c *gin.Context){
+func (h *transactionHandler) GetAllTransaction(c *gin.Context) {
 	//panic("Implemented me")
 
 }
 
-func (h *transactionHandler)GetAllTransactionByIDUser( c *gin.Context){
+func (h *transactionHandler) GetAllTransactionByIDUser(c *gin.Context) {
 	//panic("implemented me")
 	var input transactions.GetTransactionUserInput
 
@@ -59,7 +60,7 @@ func (h *transactionHandler)GetAllTransactionByIDUser( c *gin.Context){
 		c.JSON(http.StatusUnprocessableEntity, response)
 		return
 	}
-	transactions , err := h.service.GetDataTransactionByIDUser(input)
+	transactions, err := h.service.GetDataTransactionByIDUser(input)
 	if err != nil {
 		response := helper.ApiResponse("Failed to get data transactions", http.StatusUnprocessableEntity, "error", nil)
 		c.JSON(http.StatusUnprocessableEntity, response)

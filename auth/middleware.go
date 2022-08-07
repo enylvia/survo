@@ -1,12 +1,13 @@
 package auth
 
 import (
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
 	"survorest/helper"
 	"survorest/user"
+
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-gonic/gin"
 )
 
 func AuthMiddleware(authService user.Service) gin.HandlerFunc {
@@ -27,28 +28,28 @@ func AuthMiddleware(authService user.Service) gin.HandlerFunc {
 		}
 		jwtWrapper := JwtWrapper{
 			SecretKey: "survosecret",
-			Issuer: "AuthService",
+			Issuer:    "AuthService",
 		}
-		claims,err := jwtWrapper.ValidateToken(clientToken)
+		claims, err := jwtWrapper.ValidateToken(clientToken)
 		if err != nil {
 			response := helper.ApiResponse("Unauthorize", http.StatusUnauthorized, "error", nil)
 			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
 			return
 		}
 		userID := claims.UserID
-		user , _ := authService.GetUserByID(userID)
-		c.Set("claims",user)
+		user, _ := authService.GetUserByID(userID)
+		c.Set("claims", user)
 	}
 }
 
-func AuthAdminMiddleware() gin.HandlerFunc{
+func AuthAdminMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		session := sessions.Default(c)
 
 		userIDSession := session.Get("userID")
 
 		if userIDSession == nil {
-			c.Redirect(http.StatusFound,"/dashboard")
+			c.Redirect(http.StatusFound, "/dashboard")
 			return
 		}
 	}

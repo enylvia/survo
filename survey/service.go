@@ -24,7 +24,7 @@ func NewService(repository Repository, userRepository user.Repository) *service 
 }
 
 func (s *service) CreateSurveyForm(input CreateSurveyInput) (Survey, error) {
-	findUser,_ := s.userRepository.FindByID(int(input.UserId))
+	findUser, _ := s.userRepository.FindByID(int(input.UserId))
 
 	if findUser.Attribut.IsPremium != true && findUser.Attribut.PostedSurvey < 1 {
 		var survey Survey
@@ -86,13 +86,17 @@ func (s *service) CreateSurveyForm(input CreateSurveyInput) (Survey, error) {
 		updateDataUser.Attribut.PostedSurvey = updateDataUser.Attribut.PostedSurvey + 1
 		s.userRepository.UpdateAttribut(updateDataUser.Attribut)
 		return survey, nil
-	}else{
+	} else {
 		var survey Survey
 		return survey, errors.New("Post Limit")
 	}
 }
 
 func (s *service) GetSurveyDetail(id int) (Survey, error) {
+	var survey Survey
+	if id == 0 {
+		return survey, errors.New("Survey Not Found")
+	}
 	survey, err := s.repository.GetSurveyDetail(id)
 	if survey.Id != uint(id) {
 		return survey, errors.New("Survey not found")
@@ -128,12 +132,12 @@ func (s *service) AnswerQuestion(input []AnswerInput) (Answer, error) {
 		s.repository.CreateAnswer(answer)
 	}
 	userID := input[0].UserId
-	findUser , err := s.userRepository.FindByID(int(userID))
+	findUser, err := s.userRepository.FindByID(int(userID))
 	if err != nil {
 		return answer, errors.New("User not found")
 	}
 	surveyID := input[0].SurveyId
-	getSurveyDetailFirst , err := s.repository.GetSurveyDetail(int(surveyID))
+	getSurveyDetailFirst, err := s.repository.GetSurveyDetail(int(surveyID))
 	if err != nil {
 		return answer, errors.New("Survey not found")
 	}
@@ -151,11 +155,14 @@ func (s *service) AnswerQuestion(input []AnswerInput) (Answer, error) {
 	return answer, nil
 }
 
-func (s *service)GetRespondSurvey(id int) ([]Answer, error){
-	respond ,err := s.repository.GetSurveyRespond(id)
+func (s *service) GetRespondSurvey(id int) ([]Answer, error) {
+	if id == 0 {
+		return nil, errors.New("Survey not found")
+	}
+	respond, err := s.repository.GetSurveyRespond(id)
 
 	if err != nil {
-		return respond , err
+		return respond, err
 	}
-	return respond,nil
+	return respond, nil
 }

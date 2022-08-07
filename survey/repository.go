@@ -10,8 +10,8 @@ type Repository interface {
 	CreateSurvey(survey Survey) (Survey, error)
 	CreateQuestion(question Question) (Question, error)
 	CreateAnswer(answer Answer) (Answer, error)
-	GetSurveyDetail(id int)(Survey, error)
-	GetSurveyRespond(id int)([]Answer, error)
+	GetSurveyDetail(id int) (Survey, error)
+	GetSurveyRespond(id int) ([]Answer, error)
 }
 
 type repository struct {
@@ -21,8 +21,6 @@ type repository struct {
 func NewRepository(db *gorm.DB) *repository {
 	return &repository{db: db}
 }
-
-
 
 func (r *repository) GetSurvey() ([]Survey, error) {
 	//TODO implement me
@@ -48,7 +46,7 @@ func (r *repository) CreateSurvey(survey Survey) (Survey, error) {
 	if err != nil {
 		return survey, err
 	}
-	return survey,nil
+	return survey, nil
 }
 
 func (r *repository) CreateQuestion(question Question) (Question, error) {
@@ -56,10 +54,10 @@ func (r *repository) CreateQuestion(question Question) (Question, error) {
 	if err != nil {
 		return question, err
 	}
-	return question,err
+	return question, err
 }
 
-func (r *repository) GetSurveyDetail(id int)(Survey, error){
+func (r *repository) GetSurveyDetail(id int) (Survey, error) {
 	var surveys Survey
 	err := r.db.Preload("Questions").Where("id = ?", id).Find(&surveys).Error
 	if err != nil {
@@ -73,10 +71,10 @@ func (r *repository) CreateAnswer(answer Answer) (Answer, error) {
 	if err != nil {
 		return answer, err
 	}
-	return answer,err
+	return answer, err
 }
 
-func (r *repository) GetSurveyRespond(id int) ([]Answer,error){
+func (r *repository) GetSurveyRespond(id int) ([]Answer, error) {
 	var respond []Answer
 	err := r.db.Where("survey_id = ?", id).Find(&respond).Error
 	if err != nil {

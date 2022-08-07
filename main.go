@@ -14,18 +14,18 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
-	"gorm.io/driver/postgres"
+	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 
 	webHandler "survorest/web/handler"
 )
 
 func main() {
-	// dsn := "survo:AVNS_pgQn9ILGvDm12asuTG2@tcp(survo-db-do-user-11081946-0.b.db.ondigitalocean.com:25060)/survo?charset=utf8mb4&parseTime=True&loc=Local"
-	// db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	dsn := "root:@tcp(127.0.0.1:3306)/survo?charset=utf8mb4&parseTime=True&loc=Local"
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
-	dsn := "postgres://ndgownkmqbplmm:e9ae287ceccf8d993e76540c09f9297328db128f5be24ce932a9a9bf8bb65e4f@ec2-23-23-151-191.compute-1.amazonaws.com:5432/d3mhbf33iu0k5b"
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	// dsn := "postgres://ndgownkmqbplmm:e9ae287ceccf8d993e76540c09f9297328db128f5be24ce932a9a9bf8bb65e4f@ec2-23-23-151-191.compute-1.amazonaws.com:5432/d3mhbf33iu0k5b"
+	// db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 	if err != nil {
 		log.Fatal(err.Error())
@@ -82,7 +82,7 @@ func main() {
 
 	router.GET("/dashboard", userWebHandler.Dashboard)
 	router.POST("/session", userWebHandler.Create)
-	// router.Use(auth.AuthAdminMiddleware())
+	router.Use(auth.AuthAdminMiddleware())
 	router.GET("/logout", userWebHandler.Destroy)
 	router.GET("/users", userWebHandler.Index)
 	router.GET("/user/delete/:id", userWebHandler.Delete)
