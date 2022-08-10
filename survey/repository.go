@@ -12,6 +12,7 @@ type Repository interface {
 	CreateAnswer(answer Answer) (Answer, error)
 	GetSurveyDetail(id int) (Survey, error)
 	GetSurveyRespond(id int) ([]Answer, error)
+	DeleteSurvey(id int) error
 }
 
 type repository struct {
@@ -81,4 +82,12 @@ func (r *repository) GetSurveyRespond(id int) ([]Answer, error) {
 		return respond, err
 	}
 	return respond, nil
+}
+
+func (r *repository) DeleteSurvey(id int) error {
+	err := r.db.Where("id = ?", id).Delete(&Survey{}).Error
+	if err != nil {
+		return err
+	}
+	return nil
 }

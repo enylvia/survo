@@ -37,7 +37,7 @@ func main() {
 
 	userService := user.NewService(userRepository)
 	surveyService := survey.NewService(surveyRepository, userRepository)
-	transactionService := transactions.NewService(transactionRepository)
+	transactionService := transactions.NewService(transactionRepository, userRepository)
 
 	userHandler := handler.NewUserHandler(userService)
 	surveyHandler := handler.NewSurveyHandler(surveyService)
@@ -77,7 +77,7 @@ func main() {
 	api.POST("/createsurvey", surveyHandler.CreateSurvey)
 	api.POST("/answerquestion", surveyHandler.AnswerQuestion)
 	api.GET("/transaction/:id", transactionHandler.GetAllTransactionByIDUser)
-	api.POST("/transactionpremium", transactionHandler.CreateTransactionPremium)
+	api.POST("/transactionpremium/:id", transactionHandler.CreateTransactionPremium)
 	api.POST("/transactionwithdraw", transactionHandler.CreateTransaction)
 
 	router.GET("/dashboard", userWebHandler.Dashboard)
@@ -86,9 +86,13 @@ func main() {
 	router.GET("/logout", userWebHandler.Destroy)
 	router.GET("/users", userWebHandler.Index)
 	router.GET("/user/delete/:id", userWebHandler.Delete)
+	router.GET("/user/detail/:id", userWebHandler.DetailUser)
 	router.GET("/surveys", surveyWebHandler.IndexSurvey)
+	router.GET("/surveys/detail/:id", surveyWebHandler.DetailSurvey)
+	router.GET("/surveys/delete/:id", surveyWebHandler.DeleteSurvey)
 	router.GET("/transactions", transactionWebHandler.IndexTransaction)
 	router.GET("/transactions/update/:id", transactionWebHandler.UpdateTransaction)
+	router.GET("/transactions/decline/:id", transactionWebHandler.DeclineTransaction)
 
 	port := os.Getenv("PORT")
 	if port == "" {

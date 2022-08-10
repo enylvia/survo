@@ -67,3 +67,15 @@ func (h *userHandler) Delete(c *gin.Context) {
 	}
 	c.Redirect(http.StatusFound, "/users")
 }
+
+func (h *userHandler) DetailUser(c *gin.Context) {
+	userId := c.Param("id")
+	id, _ := strconv.Atoi(userId)
+
+	users, err := h.userService.GetUserByID(id)
+	if err != nil {
+		c.HTML(http.StatusInternalServerError, "error.html", nil)
+	}
+	formatter := user.FormatDetailUser(users)
+	c.HTML(http.StatusOK, "user_detail.html", gin.H{"user": formatter})
+}

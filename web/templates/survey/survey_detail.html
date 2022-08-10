@@ -1,0 +1,54 @@
+{{define "content"}}
+<div class="container-fluid py-5">
+    <div class="card">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="py-3 px-3">
+
+                    <h4>DETAIL SURVEY</h4>
+                    <hr>
+                    <h6>Judul Survey : {{ .survey.Title}} </h6> 
+                    <h6>Kategori : {{ .survey.Category}} </h6>
+                    <h6>Target : {{ .survey.Target}} </h6>
+                    <h6>Point : {{ .survey.Point}} </h6>
+                    <h6>Telah Dijawab : {{ .survey.Count}} Orang </h6>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="text-right py-3 px-3">
+                    <a href="/surveys" class="btn btn-primary">Kembali</a>
+                </div>
+            </div>
+        </div>
+        <div class="py-3 px-3">
+            <h4>PERTANYAAN</h4>
+            <hr>
+                <table class="table table-bordered table-hover mb-0">
+                    <thead>
+                    <tr>
+                        <td>No</td>
+                        <td>Pertanyaan</td>
+                        <td>Type</td>
+                        <td colspan="3" class="text-center">Option</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {{range .survey.Questions}}
+                    <tr>
+                        <td>{{.ID}}</td>
+                        <td>{{.SurveyQuestion}}</td>
+                        <td>{{.QuestionType}}</td>
+                        {{range .OptionName}}
+                        <td>{{.}}</td>
+                        {{end}}
+                    </tr>
+                    {{end}}
+                    </tbody>
+                </table>
+        </div>
+    </div>
+</div>
+
+{{ end }}

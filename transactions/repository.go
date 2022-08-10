@@ -39,7 +39,7 @@ func (r *repository) UpdateTransaction(transaction Transaction) (Transaction, er
 func (r *repository) GetTransaction() ([]Transaction, error) {
 	var transactions []Transaction
 
-	err := r.db.Find(&transactions).Error
+	err := r.db.Preload("User").Find(&transactions).Error
 	if err != nil {
 		return transactions, err
 	}

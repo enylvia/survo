@@ -27,8 +27,9 @@ func InitializeSurvey() survey.Service {
 }
 func InitializeTrx() transactions.Service {
 	db, _ := GetConnection()
+	userRepository := user.NewRepository(db)
 	trxRepository := transactions.NewRepository(db)
-	trxService := transactions.NewService(trxRepository)
+	trxService := transactions.NewService(trxRepository, userRepository)
 
 	return trxService
 }
@@ -53,7 +54,6 @@ func TestServiceRegisterUserFailed(t *testing.T) {
 
 }
 func TestServiceRegisterUserSuccess(t *testing.T) {
-	//TODO implement me
 	service := InitializeUser()
 	hashPassword, _ := bcrypt.GenerateFromPassword([]byte("mocking"), bcrypt.MinCost)
 	var inputUser = user.RegisterInput{

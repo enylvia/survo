@@ -1063,7 +1063,8 @@ func TestGetAllTransactionByIDUser_InvalidInput(t *testing.T) {
 	transactionRepository := transactions.NewRepository(db)
 	authRepository := user.NewRepository(db)
 	authService := user.NewService(authRepository)
-	transactionService := transactions.NewService(transactionRepository)
+	userRepository := user.NewRepository(db)
+	transactionService := transactions.NewService(transactionRepository, userRepository)
 	transactionHandler := handler.NewTransactionHandler(transactionService)
 
 	jwtWrapper := auth.JwtWrapper{
@@ -1103,7 +1104,8 @@ func TestGetAllTransactionByIDUser_Success(t *testing.T) {
 	transactionRepository := transactions.NewRepository(db)
 	authRepository := user.NewRepository(db)
 	authService := user.NewService(authRepository)
-	transactionService := transactions.NewService(transactionRepository)
+	userRepository := user.NewRepository(db)
+	transactionService := transactions.NewService(transactionRepository, userRepository)
 	transactionHandler := handler.NewTransactionHandler(transactionService)
 
 	jwtWrapper := auth.JwtWrapper{
@@ -1143,7 +1145,8 @@ func TestCreateTransactionFailedIfNotLogin(t *testing.T) {
 	transactionRepository := transactions.NewRepository(db)
 	authRepository := user.NewRepository(db)
 	authService := user.NewService(authRepository)
-	transactionService := transactions.NewService(transactionRepository)
+	userRepository := user.NewRepository(db)
+	transactionService := transactions.NewService(transactionRepository, userRepository)
 	transactionHandler := handler.NewTransactionHandler(transactionService)
 
 	router.Use(auth.AuthMiddleware(authService))
@@ -1184,7 +1187,8 @@ func TestCreateTransactionFailedIfTokenNotValid(t *testing.T) {
 	transactionRepository := transactions.NewRepository(db)
 	authRepository := user.NewRepository(db)
 	authService := user.NewService(authRepository)
-	transactionService := transactions.NewService(transactionRepository)
+	userRepository := user.NewRepository(db)
+	transactionService := transactions.NewService(transactionRepository, userRepository)
 	transactionHandler := handler.NewTransactionHandler(transactionService)
 
 	jwtWrapper := auth.JwtWrapper{
@@ -1235,7 +1239,8 @@ func TestCreateTransactionSuccessIfTokenValid(t *testing.T) {
 	transactionRepository := transactions.NewRepository(db)
 	authRepository := user.NewRepository(db)
 	authService := user.NewService(authRepository)
-	transactionService := transactions.NewService(transactionRepository)
+	userRepository := user.NewRepository(db)
+	transactionService := transactions.NewService(transactionRepository, userRepository)
 	transactionHandler := handler.NewTransactionHandler(transactionService)
 
 	jwtWrapper := auth.JwtWrapper{
@@ -1286,7 +1291,8 @@ func TestTransactionPremiumFailedIfTokenNotValid(t *testing.T) {
 	transactionRepository := transactions.NewRepository(db)
 	authRepository := user.NewRepository(db)
 	authService := user.NewService(authRepository)
-	transactionService := transactions.NewService(transactionRepository)
+	userRepository := user.NewRepository(db)
+	transactionService := transactions.NewService(transactionRepository, userRepository)
 	transactionHandler := handler.NewTransactionHandler(transactionService)
 
 	jwtWrapper := auth.JwtWrapper{
@@ -1337,7 +1343,8 @@ func TestTransactionPremiumSuccessIfTokenValid(t *testing.T) {
 	transactionRepository := transactions.NewRepository(db)
 	authRepository := user.NewRepository(db)
 	authService := user.NewService(authRepository)
-	transactionService := transactions.NewService(transactionRepository)
+	userRepository := user.NewRepository(db)
+	transactionService := transactions.NewService(transactionRepository, userRepository)
 	transactionHandler := handler.NewTransactionHandler(transactionService)
 
 	jwtWrapper := auth.JwtWrapper{

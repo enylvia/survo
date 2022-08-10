@@ -1,0 +1,44 @@
+{{define "content"}}
+<div class="container-fluid py-5">
+    <div class="card">
+        <h5 class="pt-3 px-3">Detail Pengguna</h5>
+        <div class="text-right px-3">
+            <a href="/users" class="btn btn-sm btn-primary">Kembali</a>
+        </div>
+        <hr>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h4 class="text-center">PROFILE INFORMATION</h4>
+                    <hr>
+                    <h6>Full Name : {{.user.FullName}}</h6>
+                    <hr>
+                    <h6>Username : {{.user.Username}}</h6>
+                    <hr>
+                    <h6>Email : {{.user.Email}}</h6>
+                    <hr>
+                    <h6>Occupation : {{.user.Occupation}}</h6>
+                    <hr>
+                    <h4 class="text-center">
+                        ATTRIBUTE
+                    </h4>
+                    <h5 class="text-success">Balance : {{.user.Attribute.Balance}}</h5>
+                    <hr>
+                    <h6>Posted Survey : {{.user.Attribute.PostedSurvey}}</h6>
+                    <hr>
+                    <h6>Total Respondent : {{.user.Attribute.TotalRespondent}}</h6>
+                    <hr>
+                    <h6>Participate Survey : {{.user.Attribute.ParticipateSurvey}}</h6>
+                    <hr>
+                    <h6>STATUS : {{.user.IsAdmin}}</h6>
+
+                </div>
+                <div class="col-md-6 text-center">
+                    <img src="/images/{{.user.Image}}" alt="Avatar" class="img-fluid">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{ end }}

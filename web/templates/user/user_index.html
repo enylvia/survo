@@ -23,7 +23,8 @@
                     <td>{{.Email}}</td>
                     <td>{{.Occupation}}</td>
                     <td>
-                        <a href="/user/delete/{{.Id}}" class="btn btn-sm btn-danger">DELETE</a>
+                        <a href="/user/delete/{{.Id}}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure to delete?')">DELETE</a>
+                        <a href="/user/detail/{{.Id}}" class="btn btn-sm btn-success">DETAIL</a>
                     </td>
                 </tr>
                 {{end}}

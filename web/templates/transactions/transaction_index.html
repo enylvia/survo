@@ -18,12 +18,13 @@
         {{range .transactions}}
         <tr>
           <td>{{.ID}}</td>
-          <td>{{.UserId}}</td>
+          <td>{{.User.FullName}}</td>
           <td>{{.Amount}}</td>
           <td>{{.Status}}</td>
           <td>{{.Type}}</td>
           <td>
             <a href="/transactions/update/{{.ID}}" class="btn btn-sm btn-success">Confirmation</a>
+            <a href="/transactions/decline/{{.ID}}" class="btn btn-sm btn-danger">Decline</a>
           </td>
         </tr>
         {{end}}

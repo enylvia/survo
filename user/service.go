@@ -58,7 +58,6 @@ func (s *service) RegisterUserForm(input RegisterInput) (User, error) {
 		return user, err
 	}
 	user.Password = string(hashPassword)
-	user.Password = input.Password
 	data, err := s.repository.Create(user)
 	if err != nil {
 		return data, err

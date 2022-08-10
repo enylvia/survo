@@ -11,6 +11,7 @@ type Service interface {
 	GetSurveyList(id int) ([]Survey, error)
 	AnswerQuestion(input []AnswerInput) (Answer, error)
 	GetRespondSurvey(id int) ([]Answer, error)
+	DeleteSurvey(id int) error
 }
 type service struct {
 	repository     Repository
@@ -33,7 +34,7 @@ func (s *service) CreateSurveyForm(input CreateSurveyInput) (Survey, error) {
 		survey.Summary = input.SurveyDescription
 		survey.Category = input.SurveyCategory
 		survey.Target = input.Target
-		survey.Point = 25
+		survey.Point = 125
 
 		survey, err := s.repository.CreateSurvey(survey)
 		if err != nil {
@@ -63,7 +64,7 @@ func (s *service) CreateSurveyForm(input CreateSurveyInput) (Survey, error) {
 		survey.Summary = input.SurveyDescription
 		survey.Category = input.SurveyCategory
 		survey.Target = input.Target
-		survey.Point = 25
+		survey.Point = 125
 
 		survey, err := s.repository.CreateSurvey(survey)
 		if err != nil {
@@ -165,4 +166,15 @@ func (s *service) GetRespondSurvey(id int) ([]Answer, error) {
 		return respond, err
 	}
 	return respond, nil
+}
+
+func (s *service) DeleteSurvey(id int) error {
+	if id == 0 {
+		return errors.New("Survey not found")
+	}
+	err := s.repository.DeleteSurvey(id)
+	if err != nil {
+		return err
+	}
+	return nil
 }

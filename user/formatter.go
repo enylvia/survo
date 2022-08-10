@@ -22,14 +22,16 @@ type UserFormatterRegister struct {
 	Email      string `json:"email"`
 }
 type UserDetail struct {
-	ID        int               `json:"id"`
-	FullName  string            `json:"fullName"`
-	Email     string            `json:"email"`
-	Username  string            `json:"username"`
-	Image     string            `json:"image_path"`
-	Phone     string            `json:"phone"`
-	Birthday  string            `json:"birthday"`
-	Attribute AttributFormatter `json:"attribute"`
+	ID         int               `json:"id"`
+	FullName   string            `json:"fullName"`
+	Email      string            `json:"email"`
+	Username   string            `json:"username"`
+	Image      string            `json:"image_path"`
+	Phone      string            `json:"phone"`
+	Birthday   string            `json:"birthday"`
+	Occupation string            `json:"occupation"`
+	IsAdmin    string            `json:"is_admin"`
+	Attribute  AttributFormatter `json:"attribute"`
 }
 type AttributFormatter struct {
 	UserId            uint `json:"user_id"`
@@ -69,6 +71,8 @@ func FormatDetailUser(user User) UserDetail {
 	formatter.Image = user.Image
 	formatter.Phone = user.Phone
 	formatter.Birthday = user.Birthday
+	formatter.Occupation = user.Occupation
+	formatter.IsAdmin = user.IsAdmin
 
 	attrib := user.Attribut
 	attributFormatter := AttributFormatter{}

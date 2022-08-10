@@ -1,9 +1,13 @@
 package transactions
 
-import "errors"
+import (
+	"errors"
+	"survorest/user"
+)
 
 type service struct {
-	repository Repository
+	repository     Repository
+	userRepository user.Repository
 }
 
 type Service interface {
@@ -12,10 +16,11 @@ type Service interface {
 	CreateTransactionWithdraw(input CreateTransactionInput) (Transaction, error)
 	CreateTransactionPremium(input CreateTransactionPremium) (Transaction, error)
 	ConfirmationTransaction(id int) (Transaction, error)
+	DeclineTransaction(id int) (Transaction, error)
 }
 
-func NewService(repository Repository) *service {
-	return &service{repository}
+func NewService(repository Repository, userRepository user.Repository) *service {
+	return &service{repository, userRepository}
 }
 
 func (s *service) GetAllTransaction() ([]Transaction, error) {
@@ -40,6 +45,10 @@ func (s *service) GetDataTransactionByIDUser(input GetTransactionUserInput) ([]T
 func (s *service) CreateTransactionWithdraw(input CreateTransactionInput) (Transaction, error) {
 	if input.UserID == 0 {
 		return Transaction{}, errors.New("User ID is invalid")
+	}
+	findUser, _ := s.userRepository.FindByID(input.UserID)
+	if findUser.Attribut.Balance < input.Amount {
+		return Transaction{}, errors.New("Balance is not enough")
 	}
 	var transactions Transaction
 	transactions.UserId = input.UserID
@@ -81,6 +90,10 @@ func (s *service) ConfirmationTransaction(id int) (Transaction, error) {
 	if err != nil {
 		return transaction, err
 	}
+	updateUser, _ := s.userRepository.FindByID(findTransaction.UserId)
+	updateUser.Attribut.Balance = updateUser.Attribut.Balance - findTransaction.Amount
+	s.userRepository.UpdateAttribut(updateUser.Attribut)
+
 	findTransaction.Status = "Complete"
 
 	update, err := s.repository.UpdateTransaction(findTransaction)
@@ -89,4 +102,20 @@ func (s *service) ConfirmationTransaction(id int) (Transaction, error) {
 	}
 	return update, nil
 
+}
+func (s *service) DeclineTransaction(id int) (Transaction, error) {
+	if id == 0 {
+		return Transaction{}, errors.New("ID is Invalid")
+	}
+	var transaction Transaction
+	findTransaction, err := s.repository.GetTransactionByID(id)
+	if err != nil {
+		return transaction, err
+	}
+	findTransaction.Status = "Decline"
+	update, err := s.repository.UpdateTransaction(findTransaction)
+	if err != nil {
+		return update, err
+	}
+	return update, nil
 }
